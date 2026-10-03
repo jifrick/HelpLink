@@ -1,0 +1,64 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Moderation Queue — Admin HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">Full Moderation Queue</h1>
+      <p style="color: var(--color-text-secondary);">Review, approve, reject, or edit community submissions</p>
+    </div>
+    <a href="/admin/dashboard" class="btn btn-secondary btn-sm">&larr; Back to Dashboard</a>
+  </div>
+
+  {% if pending_items %}
+    <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+      {% for res in pending_items %}
+        <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.75rem;">
+          <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1rem;">
+            <div>
+              <div class="badge-group" style="margin-bottom: 0.5rem;">
+                <span class="badge badge-category">{{ res.category.name if res.category else 'Uncategorized' }}</span>
+                <span class="badge badge-type">{{ res.resource_type }}</span>
+                <span class="badge badge-pending">Status: Pending</span>
+              </div>
+              <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-brand);">{{ res.title }}</h2>
+              <div style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 0.2rem;">
+                Submitted by: <strong>{{ res.submitter.full_name if res.submitter else 'Guest' }}</strong> ({{ res.submitter.email if res.submitter else 'No email' }}) on {{ res.created_at.strftime('%B %d, %Y at %H:%M') }}
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <form action="/admin/resources/{{ res.id }}/status" method="POST">
+                <input type="hidden" name="status" value="published">
+                <button type="submit" class="btn btn-primary btn-sm" style="background: var(--color-accent-emerald);">Approve & Publish</button>
+              </form>
+              <form action="/admin/resources/{{ res.id }}/status" method="POST">
+                <input type="hidden" name="status" value="rejected">
+                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+              </form>
+            </div>
+          </div>
+
+          <div style="background: var(--color-bg); padding: 1rem; border-radius: var(--radius-md); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem;">
+            <p><strong>Description:</strong> {{ res.description }}</p>
+          </div>
+
+          <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; font-size: 0.9rem; color: var(--color-text-secondary);">
+            <div>📍 <strong>Location:</strong> {{ res.location }}</div>
+            <div>🔗 <strong>URL:</strong> <a href="{{ res.url }}" target="_blank" rel="noopener" style="color: var(--color-primary);">{{ res.url }}</a></div>
+            {% if res.contact %}<div>📞 <strong>Contact:</strong> {{ res.contact }}</div>{% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="background: var(--color-surface); padding: 4rem 2rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">Moderation Queue is Clean</h3>
+      <p style="color: var(--color-text-secondary);">All submitted resources have been processed.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

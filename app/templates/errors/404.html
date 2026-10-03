@@ -1,0 +1,17 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Page Not Found — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 5rem 1.5rem; text-align: center; max-width: 600px;">
+  <div style="font-size: 4rem; margin-bottom: 1rem;">🔍</div>
+  <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.75rem;">Page Not Found</h1>
+  <p style="color: var(--color-text-secondary); font-size: 1.1rem; margin-bottom: 2rem;">
+    The resource or page you are looking for might have been moved, archived, or does not exist.
+  </p>
+  <div style="display: flex; gap: 1rem; justify-content: center;">
+    <a href="/" class="btn btn-primary">Go to Homepage</a>
+    <a href="/resources" class="btn btn-secondary">Browse All Resources</a>
+  </div>
+</div>
+{% endblock %}

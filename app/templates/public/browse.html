@@ -1,0 +1,113 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Browse Resources — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+  <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem;">
+    <!-- Filter Sidebar -->
+    <aside>
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; position: sticky; top: 90px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1.25rem;">Filter Resources</h3>
+
+        <form action="/resources" method="GET">
+          <!-- Search Input -->
+          <div class="form-group">
+            <label class="form-label">Keyword Search</label>
+            <input type="text" name="q" value="{{ q }}" class="form-input" placeholder="Search keywords...">
+          </div>
+
+          <!-- Category Filter -->
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select name="category" class="form-select">
+              <option value="">All Categories</option>
+              {% for cat in categories %}
+                <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Resource Type Filter -->
+          <div class="form-group">
+            <label class="form-label">Resource Type</label>
+            <select name="type" class="form-select">
+              <option value="">All Types</option>
+              {% for rtype in resource_types %}
+                <option value="{{ rtype }}" {% if selected_type == rtype %}selected{% endif %}>{{ rtype }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <!-- Location Filter -->
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input type="text" name="location" value="{{ selected_location }}" class="form-input" placeholder="e.g. Kozhikode, Kerala, Remote">
+          </div>
+
+          <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+            <button type="submit" class="btn btn-primary" style="flex: 1;">Apply Filters</button>
+            <a href="/resources" class="btn btn-secondary">Reset</a>
+          </div>
+        </form>
+      </div>
+    </aside>
+
+    <!-- Main Results Area -->
+    <div>
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--color-brand);">
+            {% if selected_cat_obj %}{{ selected_cat_obj.name }}{% elif q %}Search results for "{{ q }}"{% else %}All Public Resources{% endif %}
+          </h1>
+          <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
+            Showing {{ resources|length }} of {{ total_items }} available resources
+          </p>
+        </div>
+
+        {% if q or selected_category or selected_type or selected_location %}
+          <div class="quick-pills" style="margin: 0;">
+            {% if q %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Query: "{{ q }}"</span>{% endif %}
+            {% if selected_category %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Category: {{ selected_category }}</span>{% endif %}
+            {% if selected_type %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Type: {{ selected_type }}</span>{% endif %}
+            {% if selected_location %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Location: {{ selected_location }}</span>{% endif %}
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Resource Grid -->
+      <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+        {% for res in resources %}
+          {% include "components/resource_card.html" %}
+        {% else %}
+          <div style="grid-column: 1 / -1; background: var(--color-surface); padding: 4rem 2rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🔎</div>
+            <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">No resources match your search</h3>
+            <p style="color: var(--color-text-secondary); max-width: 450px; margin: 0 auto 1.5rem;">
+              Try clearing filters or searching for alternative keywords like "scholarship", "course", or "internship".
+            </p>
+            <a href="/resources" class="btn btn-primary">Clear All Filters</a>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Pagination -->
+      {% if total_pages > 1 %}
+        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+          {% if page > 1 %}
+            <a href="/resources?q={{ q }}&category={{ selected_category }}&type={{ selected_type }}&location={{ selected_location }}&page={{ page - 1 }}" class="btn btn-secondary btn-sm">&larr; Previous</a>
+          {% endif %}
+
+          <span style="font-size: 0.9rem; font-weight: 600; color: var(--color-text-secondary); padding: 0 0.5rem;">
+            Page {{ page }} of {{ total_pages }}
+          </span>
+
+          {% if page < total_pages %}
+            <a href="/resources?q={{ q }}&category={{ selected_category }}&type={{ selected_type }}&location={{ selected_location }}&page={{ page + 1 }}" class="btn btn-secondary btn-sm">Next &rarr;</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

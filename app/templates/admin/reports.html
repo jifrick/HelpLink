@@ -1,0 +1,67 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}User Reports — Admin HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">Community Reports Log</h1>
+      <p style="color: var(--color-text-secondary);">Manage flagged items reported by users</p>
+    </div>
+    <a href="/admin/dashboard" class="btn btn-secondary btn-sm">&larr; Back to Dashboard</a>
+  </div>
+
+  {% if reports %}
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Resource Title</th>
+            <th>Reason</th>
+            <th>Details</th>
+            <th>Reported By</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for rep in reports %}
+            <tr>
+              <td>#{{ rep.id }}</td>
+              <td style="font-weight: 600;">
+                {% if rep.resource %}
+                  <a href="/resources/{{ rep.resource.slug }}" target="_blank">{{ rep.resource.title }} ↗</a>
+                {% else %}
+                  <span style="color: var(--color-text-muted);">Deleted Resource</span>
+                {% endif %}
+              </td>
+              <td><span class="badge badge-pending">{{ rep.reason }}</span></td>
+              <td>{{ rep.details or 'None' }}</td>
+              <td>{{ rep.user.full_name if rep.user else 'Guest' }}</td>
+              <td><span class="badge badge-{{ rep.status }}">{{ rep.status|capitalize }}</span></td>
+              <td>{{ rep.created_at.strftime('%b %d, %Y') }}</td>
+              <td>
+                {% if rep.status == 'pending' %}
+                  <form action="/admin/reports/{{ rep.id }}/status" method="POST" style="display: inline;">
+                    <input type="hidden" name="status" value="reviewed">
+                    <button type="submit" class="btn btn-sm btn-secondary">Mark Reviewed</button>
+                  </form>
+                {% else %}
+                  <span style="color: var(--color-text-muted); font-size: 0.85rem;">Resolved</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div style="background: var(--color-surface); padding: 3rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+      <p style="color: var(--color-text-secondary);">No reports recorded.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

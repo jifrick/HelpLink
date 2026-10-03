@@ -1,0 +1,155 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ resource.title }} — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container detail-container">
+
+  {% if request.query_params.get("reported") %}
+    <div class="alert alert-success alert-dismissible">
+      ✅ Report submitted successfully. Our admin moderation team will review this resource shortly.
+    </div>
+  {% endif %}
+
+  <!-- Breadcrumb -->
+  <nav class="breadcrumb">
+    <a href="/">Home</a> &rsaquo;
+    <a href="/resources">Resources</a> &rsaquo;
+    {% if resource.category %}
+      <a href="/resources?category={{ resource.category.slug }}">{{ resource.category.name }}</a> &rsaquo;
+    {% endif %}
+    <span style="color: var(--color-text-main); font-weight: 500;">{{ resource.title }}</span>
+  </nav>
+
+  <!-- Detail Card -->
+  <article class="detail-card">
+    <div class="detail-header">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+        <div class="badge-group">
+          {% if resource.category %}
+            <span class="badge badge-category">{{ resource.category.name }}</span>
+          {% endif %}
+          <span class="badge badge-type">{{ resource.resource_type }}</span>
+          <span class="badge badge-location">📍 {{ resource.location }}</span>
+        </div>
+
+        <button class="btn btn-sm btn-secondary btn-save-toggle {% if is_saved %}saved{% endif %}" data-resource-id="{{ resource.id }}">
+          {% if is_saved %}❤️ Saved{% else %}🤍 Save{% endif %}
+        </button>
+      </div>
+
+      <h1 class="detail-title">{{ resource.title }}</h1>
+
+      <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.88rem; color: var(--color-text-muted);">
+        <span>Submitted on {{ resource.created_at.strftime('%B %d, %Y') }}</span>
+        {% if resource.submitter %}
+          <span>&bull; Shared by {{ resource.submitter.full_name }}</span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Metadata Grid -->
+    <div class="detail-meta-grid">
+      <div>
+        <div class="meta-item-label">Location</div>
+        <div class="meta-item-value">📍 {{ resource.location }}</div>
+      </div>
+      <div>
+        <div class="meta-item-label">Resource Type</div>
+        <div class="meta-item-value">{{ resource.resource_type }}</div>
+      </div>
+      {% if resource.contact %}
+        <div>
+          <div class="meta-item-label">Contact / Organization</div>
+          <div class="meta-item-value">{{ resource.contact }}</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Body Description -->
+    <div class="detail-body">
+      <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.75rem;">About this Opportunity</h3>
+      <p style="white-space: pre-line;">{{ resource.description }}</p>
+    </div>
+
+    <!-- Tags -->
+    {% if resource.tags %}
+      <div style="margin-bottom: 2rem;">
+        <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 0.5rem;">Associated Tags:</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+          {% for tag in resource.tags %}
+            <a href="/resources?q={{ tag.name }}" class="pill-tag">#{{ tag.name }}</a>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    <!-- Outbound CTA & Share Bar -->
+    <div class="action-bar-large">
+      <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg" style="box-shadow: var(--shadow-md);">
+        Visit External Resource &nearr;
+      </a>
+
+      <div style="display: flex; gap: 0.75rem;">
+        <button class="btn btn-secondary btn-share" data-title="{{ resource.title }}" data-url="{{ request.url }}">
+          🔗 Share Link
+        </button>
+        <button id="open-report-modal" class="btn btn-outline" style="color: var(--color-text-muted); border-color: var(--color-border);">
+          ⚠️ Report Issue
+        </button>
+      </div>
+    </div>
+    
+    <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 1rem;">
+      Note: HelpLink is a discovery index. Clicking 'Visit External Resource' will open the external official website.
+    </p>
+  </article>
+
+  <!-- Related Resources -->
+  {% if related_resources %}
+    <section style="margin-top: 3rem;">
+      <h2 class="section-title" style="font-size: 1.4rem; margin-bottom: 1.25rem;">Related Opportunities</h2>
+      <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        {% for res in related_resources %}
+          {% include "components/resource_card.html" %}
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+
+<!-- Report Issue Modal -->
+<div id="report-modal" class="modal-overlay">
+  <div class="modal-content">
+    <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">Report this Resource</h3>
+    <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+      Help us maintain high platform quality. Reports are reviewed by moderators.
+    </p>
+
+    <form action="/resources/{{ resource.id }}/report" method="POST">
+      <div class="form-group">
+        <label class="form-label">Reason for report</label>
+        <select name="reason" class="form-select" required>
+          <option value="broken_link">Broken or dead external link</option>
+          <option value="incorrect">Incorrect or outdated information</option>
+          <option value="spam">Spam or self-promotional content</option>
+          <option value="misleading">Misleading information</option>
+          <option value="inappropriate">Inappropriate content</option>
+          <option value="duplicate">Duplicate listing</option>
+          <option value="other">Other issue</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Additional Details (Optional)</label>
+        <textarea name="details" class="form-textarea" rows="3" placeholder="Provide extra context for moderators..."></textarea>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" id="close-report-modal" class="btn btn-secondary">Cancel</button>
+        <button type="submit" class="btn btn-danger">Submit Report</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

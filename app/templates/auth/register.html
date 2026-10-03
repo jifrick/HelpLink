@@ -1,0 +1,42 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Join HelpLink — Register{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem;">
+  <div class="form-card">
+    <h1 class="form-card-title">Join HelpLink</h1>
+    <p class="form-card-subtitle">Create a free account to contribute and save opportunities.</p>
+
+    {% if error %}
+      <div class="alert alert-error">
+        ⚠️ {{ error }}
+      </div>
+    {% endif %}
+
+    <form action="/register" method="POST">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" name="full_name" value="{{ full_name or '' }}" class="form-input" placeholder="e.g. Muhammed Jifri" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" value="{{ email or '' }}" class="form-input" placeholder="you@example.com" required>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-input" placeholder="At least 6 characters" required>
+        <span class="form-hint">Must contain at least 6 characters</span>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">Create Account</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--color-text-secondary);">
+      Already have an account? <a href="/login" style="color: var(--color-primary); font-weight: 600;">Sign in here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}HelpLink — Connect people with useful resources{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+  <div class="container">
+    <h1 class="hero-title">
+      Find something useful.<br><span>Share something useful.</span>
+    </h1>
+    <p class="hero-subtitle">
+      HelpLink brings together scholarships, internships, free courses, jobs, and community support into one organized, open directory.
+    </p>
+
+    <form action="/resources" method="GET" class="search-box-large">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" name="q" class="search-input-large" placeholder="Search scholarships, courses, Kozhikode jobs, free tools..." required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-lg">Search Resources</button>
+    </form>
+
+    <div class="quick-pills">
+      <span class="pill-label">Popular Searches:</span>
+      <a href="/resources?q=Scholarship" class="pill-tag">Scholarship</a>
+      <a href="/resources?q=Python" class="pill-tag">Free Python Course</a>
+      <a href="/resources?q=Kozhikode" class="pill-tag">Kozhikode Opportunities</a>
+      <a href="/resources?type=Internship" class="pill-tag">Remote Internships</a>
+      <a href="/resources?type=Tool" class="pill-tag">Free Tools</a>
+    </div>
+  </div>
+</section>
+
+<!-- Categories Grid Section -->
+<section style="padding: 3rem 0;">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Explore by Category</h2>
+        <p class="section-desc">Browse community-verified resources tailored to your goals</p>
+      </div>
+      <a href="/categories" class="btn btn-secondary btn-sm">View All Categories &rarr;</a>
+    </div>
+
+    <div class="categories-grid">
+      {% for cat in categories %}
+        <a href="/resources?category={{ cat.slug }}" class="category-card">
+          <div class="category-icon">
+            {% if cat.icon == 'book-open' %}📚
+            {% elif cat.icon == 'briefcase' %}💼
+            {% elif cat.icon == 'academic-cap' %}🎓
+            {% elif cat.icon == 'gift' %}🎁
+            {% elif cat.icon == 'heart' %}❤️
+            {% elif cat.icon == 'user-group' %}🤝
+            {% elif cat.icon == 'wrench-screwdriver' %}🛠️
+            {% elif cat.icon == 'calendar' %}📅
+            {% else %}📁{% endif %}
+          </div>
+          <div>
+            <h3 class="category-name">{{ cat.name }}</h3>
+            <p class="category-desc">{{ cat.description }}</p>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Featured & Recent Resources -->
+<section style="padding: 2rem 0 4rem; background: var(--color-surface); border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+  <div class="container">
+    <div class="section-header">
+      <div>
+        <h2 class="section-title">Recently Added Resources</h2>
+        <p class="section-desc">Latest verified community contributions available right now</p>
+      </div>
+      <a href="/resources" class="btn btn-outline">Explore All Resources &rarr;</a>
+    </div>
+
+    <div class="resources-grid">
+      {% for res in recent_resources %}
+        {% include "components/resource_card.html" %}
+      {% else %}
+        <p style="color: var(--color-text-muted);">No published resources available yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- How HelpLink Works -->
+<section style="padding: 4rem 0;">
+  <div class="container">
+    <div style="text-align: center; max-width: 600px; margin: 0 auto 3rem;">
+      <h2 class="section-title">How HelpLink Works</h2>
+      <p class="section-desc">Discovery first. Simple, fast, and community-driven.</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem;">
+      <div style="background: var(--color-surface); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--color-primary); margin-bottom: 0.5rem;">01</div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-brand);">Discover</h3>
+        <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
+          Search or filter across scholarships, jobs, courses, and local community support programs.
+        </p>
+      </div>
+
+      <div style="background: var(--color-surface); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--color-accent-emerald); margin-bottom: 0.5rem;">02</div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-brand);">Share</h3>
+        <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
+          Found a legitimate scholarship, free developer tool, or volunteer program? Submit it in seconds.
+        </p>
+      </div>
+
+      <div style="background: var(--color-surface); padding: 2rem; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">03</div>
+        <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--color-brand);">Help Others</h3>
+        <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
+          Every submission goes through community moderation to ensure high quality and zero spam.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Contribution Callout Banner -->
+<section style="padding: 3.5rem 0 5rem;">
+  <div class="container">
+    <div style="background: linear-gradient(135deg, var(--color-brand), #1E293B); color: white; border-radius: var(--radius-lg); padding: 3.5rem 2.5rem; text-align: center; box-shadow: var(--shadow-xl);">
+      <h2 style="font-size: 2.25rem; font-weight: 800; margin-bottom: 1rem;">Know a useful opportunity or resource?</h2>
+      <p style="font-size: 1.1rem; color: #94A3B8; max-width: 600px; margin: 0 auto 2rem;">
+        Help students, job seekers, and community members by sharing legitimate opportunities with the community.
+      </p>
+      <a href="/submit" class="btn btn-primary btn-lg" style="background: var(--color-primary);">+ Submit a Resource Now</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

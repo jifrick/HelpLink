@@ -1,0 +1,40 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Sign In — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem;">
+  <div class="form-card">
+    <h1 class="form-card-title">Welcome Back</h1>
+    <p class="form-card-subtitle">Sign in to submit, save, and manage community resources.</p>
+
+    {% if error %}
+      <div class="alert alert-error">
+        ⚠️ {{ error }}
+      </div>
+    {% endif %}
+
+    <form action="/login" method="POST">
+      {% if next %}
+        <input type="hidden" name="next" value="{{ next }}">
+      {% endif %}
+
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input type="email" name="email" value="{{ email or '' }}" class="form-input" placeholder="you@example.com" required autofocus>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-lg" style="width: 100%; margin-top: 1rem;">Sign In</button>
+    </form>
+
+    <div style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem; color: var(--color-text-secondary);">
+      Don't have an account? <a href="/register" style="color: var(--color-primary); font-weight: 600;">Create one here</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

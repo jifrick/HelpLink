@@ -1,0 +1,31 @@
+<header class="site-header">
+  <div class="container nav-wrapper">
+    <a href="/" class="brand-logo">
+      <div class="brand-icon">H</div>
+      <span>HelpLink</span>
+    </a>
+
+    <nav>
+      <ul class="nav-links">
+        <li><a href="/" class="nav-link">Home</a></li>
+        <li><a href="/resources" class="nav-link">Browse</a></li>
+        <li><a href="/categories" class="nav-link">Categories</a></li>
+        <li><a href="/about" class="nav-link">About</a></li>
+      </ul>
+    </nav>
+
+    <div class="nav-actions">
+      {% if current_user %}
+        <a href="/submit" class="btn btn-outline btn-sm">+ Submit Resource</a>
+        <a href="/dashboard" class="btn btn-secondary btn-sm">My Dashboard</a>
+        {% if current_user.role == 'admin' %}
+          <a href="/admin/dashboard" class="btn btn-primary btn-sm" style="background: #0F172A;">⚙️ Admin</a>
+        {% endif %}
+        <a href="/logout" class="nav-link" style="font-size: 0.88rem; color: var(--color-danger);">Sign Out</a>
+      {% else %}
+        <a href="/login" class="nav-link">Sign In</a>
+        <a href="/register" class="btn btn-primary btn-sm">Join HelpLink</a>
+      {% endif %}
+    </div>
+  </div>
+</header>

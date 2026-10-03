@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}My Saved Bookmarks — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+  <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">Saved Bookmarks</h1>
+  <p style="color: var(--color-text-secondary); margin-bottom: 2rem;">Access your bookmarked scholarships, courses, and opportunities in one place.</p>
+
+  {% if saved_items %}
+    <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+      {% for res in saved_items %}
+        {% include "components/resource_card.html" %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div style="background: var(--color-surface); padding: 4rem 2rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border); max-width: 600px; margin: 0 auto;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🤍</div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">No saved resources yet</h3>
+      <p style="color: var(--color-text-secondary); margin-bottom: 1.5rem;">
+        When you browse HelpLink, click the "Save" button on any card to store opportunities here.
+      </p>
+      <a href="/resources" class="btn btn-primary">Browse Resources &rarr;</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

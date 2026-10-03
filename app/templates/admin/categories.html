@@ -1,0 +1,94 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Manage Categories — Admin HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">Platform Categories</h1>
+      <p style="color: var(--color-text-secondary);">View existing categories and add new resource classifications</p>
+    </div>
+    <a href="/admin/dashboard" class="btn btn-secondary btn-sm">&larr; Back to Dashboard</a>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 340px; gap: 2rem;">
+    <!-- Existing Categories List -->
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Active Categories</h2>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Icon</th>
+              <th>Name</th>
+              <th>Slug</th>
+              <th>Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for cat in categories %}
+              <tr>
+                <td style="font-size: 1.2rem;">
+                  {% if cat.icon == 'book-open' %}📚
+                  {% elif cat.icon == 'briefcase' %}💼
+                  {% elif cat.icon == 'academic-cap' %}🎓
+                  {% elif cat.icon == 'gift' %}🎁
+                  {% elif cat.icon == 'heart' %}❤️
+                  {% elif cat.icon == 'user-group' %}🤝
+                  {% elif cat.icon == 'wrench-screwdriver' %}🛠️
+                  {% elif cat.icon == 'calendar' %}📅
+                  {% else %}📁{% endif %}
+                </td>
+                <td style="font-weight: 600;">{{ cat.name }}</td>
+                <td><code>{{ cat.slug }}</code></td>
+                <td>{{ cat.description }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Create New Category Form -->
+    <div>
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Add New Category</h3>
+
+        {% if error %}
+          <div class="alert alert-error">⚠️ {{ error }}</div>
+        {% endif %}
+
+        <form action="/admin/categories" method="POST">
+          <div class="form-group">
+            <label class="form-label">Category Name *</label>
+            <input type="text" name="name" class="form-input" placeholder="e.g. Fellowships" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description</label>
+            <textarea name="description" class="form-textarea" rows="3" placeholder="Brief summary..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Icon identifier</label>
+            <select name="icon" class="form-select">
+              <option value="book-open">Education (📚)</option>
+              <option value="briefcase">Jobs (💼)</option>
+              <option value="academic-cap">Internships (🎓)</option>
+              <option value="gift">Scholarships (🎁)</option>
+              <option value="heart">Volunteering (❤️)</option>
+              <option value="user-group">Community Support (🤝)</option>
+              <option value="wrench-screwdriver">Tools (🛠️)</option>
+              <option value="calendar">Events (📅)</option>
+              <option value="folder">General Folder (📁)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Create Category</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

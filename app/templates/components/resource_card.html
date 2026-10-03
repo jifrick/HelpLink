@@ -1,0 +1,31 @@
+<div class="resource-card">
+  <div>
+    <div class="card-top">
+      <div class="badge-group">
+        {% if res.category %}
+          <span class="badge badge-category">{{ res.category.name }}</span>
+        {% endif %}
+        <span class="badge badge-type">{{ res.resource_type }}</span>
+        {% if res.status and res.status != 'published' %}
+          <span class="badge badge-{{ res.status }}">{{ res.status|capitalize }}</span>
+        {% endif %}
+      </div>
+      <button class="btn btn-sm btn-secondary btn-save-toggle" data-resource-id="{{ res.id }}" style="padding: 0.2rem 0.6rem; font-size: 0.8rem;">
+        🤍 Save
+      </button>
+    </div>
+
+    <h3 class="card-title">
+      <a href="/resources/{{ res.slug }}">{{ res.title }}</a>
+    </h3>
+
+    <p class="card-description">
+      {{ res.description|striptags }}
+    </p>
+  </div>
+
+  <div class="card-footer">
+    <span>📍 {{ res.location }}</span>
+    <a href="/resources/{{ res.slug }}" class="btn btn-sm btn-outline">View Details &rarr;</a>
+  </div>
+</div>

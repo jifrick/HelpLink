@@ -1,0 +1,33 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}About HelpLink — Community Public Interest Platform{% endblock %}
+
+{% block content %}
+<div class="container" style="max-width: 800px; padding: 4rem 1.5rem;">
+  <h1 style="font-size: 2.5rem; font-weight: 800; color: var(--color-brand); margin-bottom: 1.5rem;">About HelpLink</h1>
+
+  <div style="font-size: 1.1rem; line-height: 1.8; color: var(--color-text-secondary); display: flex; flex-direction: column; gap: 1.5rem;">
+    <p>
+      <strong>HelpLink</strong> is a public-interest web platform built to solve information fragmentation. Everyday, thousands of valuable scholarships, entry-level jobs, internships, free learning courses, and community relief initiatives are posted across social media channels, messaging groups, and isolated websites.
+    </p>
+
+    <p>
+      Our mission is to create a single, clean, searchable community index where anyone can open HelpLink and answer:
+      <em>"What useful opportunity or assistance is available to me right now?"</em>
+    </p>
+
+    <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--color-brand); margin-top: 1rem;">Core Principles</h2>
+    <ul style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem;">
+      <li><strong>Discovery First:</strong> No complex onboarding required to find value. Browse and search instantly.</li>
+      <li><strong>Community Moderation:</strong> All submissions undergo review before publication to filter out spam and dead links.</li>
+      <li><strong>Open Accessibility:</strong> Fast, mobile-first, zero annoying ads or paywalls.</li>
+    </ul>
+
+    <div style="margin-top: 2rem; padding: 2rem; background: var(--color-surface); border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+      <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">Want to contribute?</h3>
+      <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">Have you discovered a useful scholarship or free tool? Submit it to help others in your community.</p>
+      <a href="/submit" class="btn btn-primary">Submit a Resource &rarr;</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

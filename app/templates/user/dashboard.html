@@ -1,0 +1,90 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}User Dashboard — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+
+  {% if submitted %}
+    <div class="alert alert-success alert-dismissible">
+      🎉 <strong>Thank you for contributing!</strong> Your resource has been submitted.
+      {% if submitted_status == 'pending' %}
+        It is currently in moderation review and will appear publicly once approved.
+      {% else %}
+        It has been published directly to the public directory.
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">Welcome, {{ current_user.full_name }}</h1>
+      <p style="color: var(--color-text-secondary);">Manage your submitted opportunities and saved bookmarks</p>
+    </div>
+    <a href="/submit" class="btn btn-primary">+ Submit New Resource</a>
+  </div>
+
+  <!-- Submissions Table / Cards -->
+  <div style="margin-bottom: 3.5rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">My Submissions</h2>
+
+    {% if submissions %}
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Location</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for res in submissions %}
+              <tr>
+                <td style="font-weight: 600;">
+                  <a href="/resources/{{ res.slug }}">{{ res.title }}</a>
+                </td>
+                <td>{{ res.category.name if res.category else 'Uncategorized' }}</td>
+                <td>{{ res.resource_type }}</td>
+                <td>📍 {{ res.location }}</td>
+                <td>
+                  <span class="badge badge-{{ res.status }}">{{ res.status|capitalize }}</span>
+                </td>
+                <td>{{ res.created_at.strftime('%b %d, %Y') }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="background: var(--color-surface); padding: 3rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+        <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">You haven't submitted any resources yet.</p>
+        <a href="/submit" class="btn btn-outline btn-sm">Share your first resource &rarr;</a>
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Saved Bookmarks -->
+  <div>
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">My Saved Bookmarks</h2>
+      <a href="/saved" class="btn btn-secondary btn-sm">View All Saved &rarr;</a>
+    </div>
+
+    {% if saved_items %}
+      <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+        {% for res in saved_items %}
+          {% include "components/resource_card.html" %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="background: var(--color-surface); padding: 2.5rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+        <p style="color: var(--color-text-secondary);">You haven't saved any resources yet. Click "🤍 Save" on any resource card to bookmark it.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

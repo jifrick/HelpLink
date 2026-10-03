@@ -1,0 +1,92 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Submit a Useful Resource — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 3rem 1.5rem;">
+  <div class="form-card" style="max-width: 760px;">
+    <h1 class="form-card-title">Submit a Resource</h1>
+    <p class="form-card-subtitle">
+      Share an educational opportunity, scholarship, internship, free developer tool, or community service with the public.
+    </p>
+
+    <!-- PRD Mandatory Community Notice -->
+    <div class="alert alert-info" style="margin-bottom: 2rem;">
+      💡 <strong>Community Guideline:</strong> Please only submit resources that are useful, legitimate, and appropriate for the community.
+    </div>
+
+    {% if error %}
+      <div class="alert alert-error">
+        ⚠️ {{ error }}
+      </div>
+    {% endif %}
+
+    <form action="/submit" method="POST">
+      <div class="form-group">
+        <label class="form-label">Resource Title *</label>
+        <input type="text" name="title" value="{{ form.title if form else '' }}" class="form-input" placeholder="e.g. National Merit Scholarship 2026" required autofocus>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Category *</label>
+          <select name="category_id" class="form-select" required>
+            <option value="">Select Category</option>
+            {% for cat in categories %}
+              <option value="{{ cat.id }}" {% if form and form.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Resource Type *</label>
+          <select name="resource_type" class="form-select" required>
+            <option value="">Select Resource Type</option>
+            {% for rtype in resource_types %}
+              <option value="{{ rtype }}" {% if form and form.resource_type == rtype %}selected{% endif %}>{{ rtype }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Location *</label>
+          <input type="text" name="location" value="{{ form.location if form else 'Remote' }}" class="form-input" placeholder="e.g. Kozhikode, Kerala, Remote, or India" required>
+          <span class="form-hint">Specify city, state, country, or Remote</span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">External Destination URL *</label>
+          <input type="url" name="url" value="{{ form.url if form else '' }}" class="form-input" placeholder="https://official-website.org" required>
+          <span class="form-hint">Must start with http:// or https://</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Detailed Description *</label>
+        <textarea name="description" class="form-textarea" rows="6" placeholder="Provide a thorough description of who this resource is for, eligibility criteria, application process, and deadlines..." required>{{ form.description if form else '' }}</textarea>
+        <span class="form-hint">Minimum 20 characters</span>
+      </div>
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Contact Email / Phone (Optional)</label>
+          <input type="text" name="contact" value="{{ form.contact if form else '' }}" class="form-input" placeholder="e.g. info@scholarship.org">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Tags (Optional)</label>
+          <input type="text" name="tags_raw" value="{{ form.tags_raw if form else '' }}" class="form-input" placeholder="e.g. python, scholarship, beginners">
+          <span class="form-hint">Comma separated keywords</span>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+        <a href="/" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg">Submit Resource for Review &rarr;</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

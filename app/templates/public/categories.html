@@ -1,0 +1,39 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Resource Categories — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 4rem;">
+  <div style="text-align: center; max-width: 600px; margin: 0 auto 3rem;">
+    <h1 class="hero-title" style="font-size: 2.5rem; margin-bottom: 0.75rem;">Explore All Categories</h1>
+    <p class="hero-subtitle" style="font-size: 1.1rem; margin-bottom: 0;">
+      HelpLink organizes opportunities into structured categories to streamline your discovery experience.
+    </p>
+  </div>
+
+  <div class="categories-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+    {% for cat in categories %}
+      <a href="/resources?category={{ cat.slug }}" class="category-card" style="padding: 2rem;">
+        <div class="category-icon" style="width: 54px; height: 54px; font-size: 1.75rem;">
+          {% if cat.icon == 'book-open' %}📚
+          {% elif cat.icon == 'briefcase' %}💼
+          {% elif cat.icon == 'academic-cap' %}🎓
+          {% elif cat.icon == 'gift' %}🎁
+          {% elif cat.icon == 'heart' %}❤️
+          {% elif cat.icon == 'user-group' %}🤝
+          {% elif cat.icon == 'wrench-screwdriver' %}🛠️
+          {% elif cat.icon == 'calendar' %}📅
+          {% else %}📁{% endif %}
+        </div>
+        <div>
+          <h3 class="category-name" style="font-size: 1.25rem;">{{ cat.name }}</h3>
+          <p class="category-desc" style="font-size: 0.92rem; margin-top: 0.4rem;">{{ cat.description }}</p>
+        </div>
+        <div style="font-size: 0.88rem; font-weight: 600; color: var(--color-primary); margin-top: auto;">
+          Browse Resources &rarr;
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
