@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 from app.core.config import settings
@@ -7,6 +8,9 @@ connect_args = {}
 
 if db_url.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+    # On Vercel serverless filesystem, /var/task is read-only. Redirect SQLite to /tmp if fallback is used.
+    if os.environ.get("VERCEL") and "./helplink.db" in db_url:
+        db_url = "sqlite:////tmp/helplink.db"
 elif db_url.startswith("postgresql://"):
     # SQLAlchemy 2.0 driver mapping for psycopg2
     db_url = db_url.replace("postgresql://", "postgresql+psycopg2://", 1)

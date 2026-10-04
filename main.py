@@ -17,11 +17,14 @@ templates = Jinja2Templates(directory="app/templates")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    db = SessionLocal()
     try:
-        init_db(db)
-    finally:
-        db.close()
+        db = SessionLocal()
+        try:
+            init_db(db)
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"Lifespan DB initialization warning: {e}")
     yield
 
 app = FastAPI(
