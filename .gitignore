@@ -18,7 +18,9 @@ venv.bak/
 
 # Environment & Secrets
 .env
-.env.local
+*.env
+.env.*
+!.env.example
 
 # Testing & Coverage
 .pytest_cache/
