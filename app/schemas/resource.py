@@ -2,16 +2,34 @@ from datetime import datetime
 from typing import Optional, List, Any
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from app.schemas.category import CategoryOut
+from app.core.constants import ALLOWED_RESOURCE_TYPES
+from app.services.utils import validate_url_string
 
 class ResourceBase(BaseModel):
     title: str = Field(..., min_length=5, max_length=255)
     description: str = Field(..., min_length=20)
     category_id: int
-    resource_type: str  # Opportunity, Course, Scholarship, Job, Internship, Event, Support, Tool, Other
+    resource_type: str
     location: str = Field(default="Remote", max_length=150)
     url: str
     contact: Optional[str] = None
     tags: Optional[List[str]] = []
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: str) -> str:
+        clean_url = v.strip()
+        if not validate_url_string(clean_url):
+            raise ValueError("URL must be a valid web address starting with http:// or https://")
+        return clean_url
+
+    @field_validator("resource_type")
+    @classmethod
+    def validate_resource_type(cls, v: str) -> str:
+        clean_type = v.strip()
+        if clean_type not in ALLOWED_RESOURCE_TYPES:
+            raise ValueError(f"Resource type must be one of: {', '.join(ALLOWED_RESOURCE_TYPES)}")
+        return clean_type
 
 class ResourceCreate(ResourceBase):
     pass
@@ -26,6 +44,26 @@ class ResourceUpdate(BaseModel):
     contact: Optional[str] = None
     status: Optional[str] = None
     tags: Optional[List[str]] = None
+
+    @field_validator("url")
+    @classmethod
+    def validate_url(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        clean_url = v.strip()
+        if not validate_url_string(clean_url):
+            raise ValueError("URL must be a valid web address starting with http:// or https://")
+        return clean_url
+
+    @field_validator("resource_type")
+    @classmethod
+    def validate_resource_type(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        clean_type = v.strip()
+        if clean_type not in ALLOWED_RESOURCE_TYPES:
+            raise ValueError(f"Resource type must be one of: {', '.join(ALLOWED_RESOURCE_TYPES)}")
+        return clean_type
 
 class ResourceOut(BaseModel):
     id: int

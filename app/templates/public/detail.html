@@ -1,6 +1,8 @@
 {% extends "layouts/base.html" %}
 
 {% block title %}{{ resource.title }} — HelpLink{% endblock %}
+{% block meta_description %}{{ resource.description|striptags|truncate(155) }}{% endblock %}
+{% block og_title %}{{ resource.title }} — HelpLink Community Network{% endblock %}
 
 {% block content %}
 <div class="container detail-container">
@@ -12,7 +14,7 @@
   {% endif %}
 
   <!-- Breadcrumb -->
-  <nav class="breadcrumb">
+  <nav class="breadcrumb" aria-label="Breadcrumb navigation">
     <a href="/">Home</a> &rsaquo;
     <a href="/resources">Resources</a> &rsaquo;
     {% if resource.category %}
@@ -24,7 +26,7 @@
   <!-- Detail Card -->
   <article class="detail-card">
     <div class="detail-header">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
         <div class="badge-group">
           {% if resource.category %}
             <span class="badge badge-category">{{ resource.category.name }}</span>
@@ -33,14 +35,14 @@
           <span class="badge badge-location">📍 {{ resource.location }}</span>
         </div>
 
-        <button class="btn btn-sm btn-secondary btn-save-toggle {% if is_saved %}saved{% endif %}" data-resource-id="{{ resource.id }}">
+        <button class="btn btn-sm btn-secondary btn-save-toggle {% if is_saved %}saved{% endif %}" data-resource-id="{{ resource.id }}" aria-label="Bookmark resource">
           {% if is_saved %}❤️ Saved{% else %}🤍 Save{% endif %}
         </button>
       </div>
 
       <h1 class="detail-title">{{ resource.title }}</h1>
 
-      <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.88rem; color: var(--color-text-muted);">
+      <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.88rem; color: var(--color-text-muted); flex-wrap: wrap;">
         <span>Submitted on {{ resource.created_at.strftime('%B %d, %Y') }}</span>
         {% if resource.submitter %}
           <span>&bull; Shared by {{ resource.submitter.full_name }}</span>
@@ -68,7 +70,7 @@
 
     <!-- Body Description -->
     <div class="detail-body">
-      <h3 style="font-size: 1.2rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.75rem;">About this Opportunity</h3>
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.75rem;">About this Opportunity</h2>
       <p style="white-space: pre-line;">{{ resource.description }}</p>
     </div>
 
@@ -86,20 +88,20 @@
 
     <!-- Outbound CTA & Share Bar -->
     <div class="action-bar-large">
-      <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg" style="box-shadow: var(--shadow-md);">
+      <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg" aria-label="Visit external website for {{ resource.title }}" style="box-shadow: var(--shadow-md);">
         Visit External Resource &nearr;
       </a>
 
-      <div style="display: flex; gap: 0.75rem;">
-        <button class="btn btn-secondary btn-share" data-title="{{ resource.title }}" data-url="{{ request.url }}">
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-share" data-title="{{ resource.title }}" data-url="{{ request.url }}" aria-label="Share resource link">
           🔗 Share Link
         </button>
-        <button id="open-report-modal" class="btn btn-outline" style="color: var(--color-text-muted); border-color: var(--color-border);">
+        <button id="open-report-modal" class="btn btn-outline" style="color: var(--color-text-muted); border-color: var(--color-border);" aria-label="Report resource issue">
           ⚠️ Report Issue
         </button>
       </div>
     </div>
-    
+
     <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 1rem;">
       Note: HelpLink is a discovery index. Clicking 'Visit External Resource' will open the external official website.
     </p>
@@ -119,9 +121,9 @@
 </div>
 
 <!-- Report Issue Modal -->
-<div id="report-modal" class="modal-overlay">
+<div id="report-modal" class="modal-overlay" role="dialog" aria-labelledby="report-modal-title" aria-modal="true">
   <div class="modal-content">
-    <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">Report this Resource</h3>
+    <h3 id="report-modal-title" style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">Report this Resource</h3>
     <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
       Help us maintain high platform quality. Reports are reviewed by moderators.
     </p>

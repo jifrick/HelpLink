@@ -5,17 +5,16 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.category import CategoryCreate
-from app.schemas.resource import ResourceUpdate
+from app.core.constants import ALLOWED_RESOURCE_STATUSES, ALLOWED_REPORT_STATUSES
 from app.services.moderation_service import (
     get_admin_dashboard_metrics,
     get_pending_resources,
     update_resource_status,
     delete_resource
 )
-from app.services.resource_service import get_resource_by_id, update_resource
 from app.services.report_service import get_reports, update_report_status
 from app.services.category_service import get_categories, create_category
-from app.web.dependencies import require_admin_user
+from app.web.dependencies import require_admin_user, validate_csrf_and_origin
 from app.models.user import User
 
 templates = Jinja2Templates(directory="app/templates")
@@ -65,8 +64,12 @@ def admin_update_status(
     resource_id: int,
     status_val: str = Form(..., alias="status"),
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin_user)
+    admin_user: User = Depends(require_admin_user),
+    _: None = Depends(validate_csrf_and_origin)
 ):
+    if status_val not in ALLOWED_RESOURCE_STATUSES:
+        raise HTTPException(status_code=400, detail=f"Invalid resource status provided. Allowed: {', '.join(ALLOWED_RESOURCE_STATUSES)}")
+        
     res = update_resource_status(db, resource_id, status_val)
     if not res:
         raise HTTPException(status_code=404, detail="Resource not found")
@@ -76,7 +79,8 @@ def admin_update_status(
 def admin_delete_resource(
     resource_id: int,
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin_user)
+    admin_user: User = Depends(require_admin_user),
+    _: None = Depends(validate_csrf_and_origin)
 ):
     success = delete_resource(db, resource_id)
     if not success:
@@ -104,8 +108,12 @@ def admin_update_report(
     report_id: int,
     status_val: str = Form(..., alias="status"),
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin_user)
+    admin_user: User = Depends(require_admin_user),
+    _: None = Depends(validate_csrf_and_origin)
 ):
+    if status_val not in ALLOWED_REPORT_STATUSES:
+        raise HTTPException(status_code=400, detail=f"Invalid report status provided. Allowed: {', '.join(ALLOWED_REPORT_STATUSES)}")
+
     rep = update_report_status(db, report_id, status_val)
     if not rep:
         raise HTTPException(status_code=404, detail="Report not found")
@@ -135,7 +143,8 @@ def admin_create_category(
     description: Optional[str] = Form(None),
     icon: Optional[str] = Form("folder"),
     db: Session = Depends(get_db),
-    admin_user: User = Depends(require_admin_user)
+    admin_user: User = Depends(require_admin_user),
+    _: None = Depends(validate_csrf_and_origin)
 ):
     categories = get_categories(db)
     if not name.strip():

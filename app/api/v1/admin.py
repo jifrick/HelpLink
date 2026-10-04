@@ -1,9 +1,10 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, Body
+from typing import List, Optional
+from fastapi import APIRouter, Depends, Body, HTTPException, status
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.resource import ResourceOut
 from app.schemas.report import ReportOut
+from app.core.constants import ALLOWED_RESOURCE_STATUSES
 from app.services.moderation_service import (
     get_pending_resources,
     update_resource_status,
@@ -31,8 +32,11 @@ def admin_status_api(
     admin: User = Depends(require_admin_user)
 ):
     status_val = status_payload.get("status")
-    if not status_val:
-        raise HTTPException(status_code=400, detail="Missing status field")
+    if not status_val or status_val not in ALLOWED_RESOURCE_STATUSES:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Invalid status value. Allowed: {', '.join(ALLOWED_RESOURCE_STATUSES)}"
+        )
     res = update_resource_status(db, resource_id, status_val)
     if not res:
         raise HTTPException(status_code=404, detail="Resource not found")

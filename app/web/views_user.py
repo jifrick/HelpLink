@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.resource import ResourceCreate
 from app.schemas.report import ReportCreate
-from app.services.category_service import get_categories
+from app.core.constants import ALLOWED_RESOURCE_TYPES
+from app.services.category_service import get_categories, get_category_by_id
 from app.services.resource_service import (
     create_resource,
     get_user_submissions,
@@ -15,17 +16,15 @@ from app.services.resource_service import (
     get_resource_by_id
 )
 from app.services.report_service import create_report
-from app.web.dependencies import require_current_user, get_current_user_from_cookie
+from app.services.utils import validate_url_string
+from app.web.dependencies import require_current_user, get_current_user_from_cookie, validate_csrf_and_origin
 from app.models.user import User
 
 templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
-RESOURCE_TYPES = [
-    "Opportunity", "Course", "Scholarship", "Job",
-    "Internship", "Event", "Community Service", "Tool", "Support", "Other"
-]
+RESOURCE_TYPES = ALLOWED_RESOURCE_TYPES
 
 @router.get("/submit", response_class=HTMLResponse)
 def submit_resource_form(
@@ -57,10 +56,53 @@ def submit_resource_process(
     contact: Optional[str] = Form(None),
     tags_raw: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_current_user)
+    current_user: User = Depends(require_current_user),
+    _: None = Depends(validate_csrf_and_origin)
 ):
     categories = get_categories(db)
+    form_data = {
+        "title": title,
+        "category_id": category_id,
+        "resource_type": resource_type,
+        "location": location,
+        "url": url,
+        "description": description,
+        "contact": contact,
+        "tags_raw": tags_raw
+    }
 
+    # 1. Validate Category Exists
+    category = get_category_by_id(db, category_id)
+    if not category:
+        return templates.TemplateResponse(
+            request=request,
+            name="user/submit.html",
+            context={
+                "current_user": current_user,
+                "categories": categories,
+                "resource_types": RESOURCE_TYPES,
+                "error": "The selected category does not exist.",
+                "form": form_data
+            },
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    # 2. Validate Resource Type
+    if resource_type.strip() not in RESOURCE_TYPES:
+        return templates.TemplateResponse(
+            request=request,
+            name="user/submit.html",
+            context={
+                "current_user": current_user,
+                "categories": categories,
+                "resource_types": RESOURCE_TYPES,
+                "error": "The selected resource type is invalid.",
+                "form": form_data
+            },
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    # 3. Validate Title & Description
     if len(title.strip()) < 5:
         return templates.TemplateResponse(
             request=request,
@@ -70,7 +112,7 @@ def submit_resource_process(
                 "categories": categories,
                 "resource_types": RESOURCE_TYPES,
                 "error": "Title must contain at least 5 characters.",
-                "form": {"title": title, "category_id": category_id, "resource_type": resource_type, "location": location, "url": url, "description": description, "contact": contact, "tags_raw": tags_raw}
+                "form": form_data
             },
             status_code=status.HTTP_400_BAD_REQUEST
         )
@@ -84,12 +126,14 @@ def submit_resource_process(
                 "categories": categories,
                 "resource_types": RESOURCE_TYPES,
                 "error": "Description must contain at least 20 characters.",
-                "form": {"title": title, "category_id": category_id, "resource_type": resource_type, "location": location, "url": url, "description": description, "contact": contact, "tags_raw": tags_raw}
+                "form": form_data
             },
             status_code=status.HTTP_400_BAD_REQUEST
         )
 
-    if not url.strip().startswith(("http://", "https://")):
+    # 4. Robust URL Validation
+    clean_url = url.strip()
+    if not validate_url_string(clean_url):
         return templates.TemplateResponse(
             request=request,
             name="user/submit.html",
@@ -98,27 +142,39 @@ def submit_resource_process(
                 "categories": categories,
                 "resource_types": RESOURCE_TYPES,
                 "error": "Please enter a valid URL starting with http:// or https://",
-                "form": {"title": title, "category_id": category_id, "resource_type": resource_type, "location": location, "url": url, "description": description, "contact": contact, "tags_raw": tags_raw}
+                "form": form_data
             },
             status_code=status.HTTP_400_BAD_REQUEST
         )
 
     tags = [t.strip() for t in tags_raw.split(",") if t.strip()] if tags_raw else []
-
     auto_approve = (current_user.role == "admin")
 
-    res_in = ResourceCreate(
-        title=title,
-        description=description,
-        category_id=category_id,
-        resource_type=resource_type,
-        location=location,
-        url=url,
-        contact=contact,
-        tags=tags
-    )
-
-    resource = create_resource(db, res_in, user_id=current_user.id, auto_approve=auto_approve)
+    try:
+        res_in = ResourceCreate(
+            title=title.strip(),
+            description=description.strip(),
+            category_id=category_id,
+            resource_type=resource_type.strip(),
+            location=location.strip() if location else "Remote",
+            url=clean_url,
+            contact=contact.strip() if contact else None,
+            tags=tags
+        )
+        resource = create_resource(db, res_in, user_id=current_user.id, auto_approve=auto_approve)
+    except Exception as exc:
+        return templates.TemplateResponse(
+            request=request,
+            name="user/submit.html",
+            context={
+                "current_user": current_user,
+                "categories": categories,
+                "resource_types": RESOURCE_TYPES,
+                "error": f"Failed to submit resource: {str(exc)}",
+                "form": form_data
+            },
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
 
     return RedirectResponse(
         url=f"/dashboard?submitted=true&status={resource.status}",
@@ -168,7 +224,8 @@ def saved_resources_page(
 def toggle_save(
     resource_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_current_user)
+    current_user: User = Depends(require_current_user),
+    _: None = Depends(validate_csrf_and_origin)
 ):
     resource = get_resource_by_id(db, resource_id)
     if not resource:
@@ -183,13 +240,18 @@ def submit_resource_report(
     reason: str = Form(...),
     details: Optional[str] = Form(None),
     db: Session = Depends(get_db),
-    current_user: Optional[User] = Depends(get_current_user_from_cookie)
+    current_user: Optional[User] = Depends(get_current_user_from_cookie),
+    _: None = Depends(validate_csrf_and_origin)
 ):
     resource = get_resource_by_id(db, resource_id)
     if not resource:
         raise HTTPException(status_code=404, detail="Resource not found")
 
-    report_in = ReportCreate(resource_id=resource_id, reason=reason, details=details)
+    try:
+        report_in = ReportCreate(resource_id=resource_id, reason=reason, details=details)
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+
     user_id = current_user.id if current_user else None
     create_report(db, report_in, user_id=user_id)
 
