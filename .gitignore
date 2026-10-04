@@ -27,8 +27,10 @@ venv.bak/
 .coverage
 htmlcov/
 
-# IDE & OS
+# IDE, Tooling & OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
+.agents/
+skills-lock.json
