@@ -139,6 +139,8 @@ def init_db(db: Session):
     # 2. Seed Admin User
     admin = db.query(User).filter(User.email == settings.ADMIN_INITIAL_EMAIL.lower()).first()
     if not admin:
+        if settings.ENV == "production" and settings.ADMIN_INITIAL_PASSWORD == "AdminDevPassword123!":
+            raise ValueError("CRITICAL: Production environment detected, but default ADMIN_INITIAL_PASSWORD is in use. Set a secure ADMIN_INITIAL_PASSWORD in environment variables.")
         admin = User(
             email=settings.ADMIN_INITIAL_EMAIL.lower(),
             full_name="HelpLink Administrator",

@@ -2,8 +2,8 @@ import math
 from typing import Optional
 from fastapi import APIRouter, Request, Depends, Query, HTTPException, status
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
+from app.core.templates import templates
 from app.db.session import get_db
 from app.services.category_service import get_categories, get_category_by_slug
 from app.services.resource_service import (
@@ -13,8 +13,6 @@ from app.services.resource_service import (
 )
 from app.web.dependencies import get_current_user_from_cookie
 from app.models.user import User
-
-templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 

@@ -1,7 +1,7 @@
 from typing import Optional, List
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
-from fastapi.templating import Jinja2Templates
+from app.core.templates import templates
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.resource import ResourceCreate
@@ -19,8 +19,6 @@ from app.services.report_service import create_report
 from app.services.utils import validate_url_string
 from app.web.dependencies import require_current_user, get_current_user_from_cookie, validate_csrf_and_origin
 from app.models.user import User
-
-templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 

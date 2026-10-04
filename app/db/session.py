@@ -18,6 +18,7 @@ elif db_url.startswith("postgresql://"):
 engine = create_engine(
     db_url,
     connect_args=connect_args,
+    pool_pre_ping=True,
     echo=False
 )
 

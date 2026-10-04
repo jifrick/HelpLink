@@ -8,12 +8,13 @@ from fastapi.templating import Jinja2Templates
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.config import settings
+from app.core.templates import templates, APP_DIR
 from app.db.session import SessionLocal
 from app.db.init_db import init_db
 from app.web import views_public, views_auth, views_user, views_admin
 from app.api.router import api_router
 
-templates = Jinja2Templates(directory="app/templates")
+STATIC_DIR = os.path.join(APP_DIR, "static")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -34,7 +35,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):

@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Request, Depends, Form, HTTPException, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from app.core.templates import templates
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.category import CategoryCreate
@@ -16,8 +16,6 @@ from app.services.report_service import get_reports, update_report_status
 from app.services.category_service import get_categories, create_category
 from app.web.dependencies import require_admin_user, validate_csrf_and_origin
 from app.models.user import User
-
-templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter(prefix="/admin")
 

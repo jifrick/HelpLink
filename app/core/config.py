@@ -24,5 +24,4 @@ settings = Settings()
 if settings.ENV == "production":
     if settings.SECRET_KEY == "helplink_dev_secret_key_change_in_prod_2026_987654321":
         raise ValueError("CRITICAL: Production environment detected, but default SECRET_KEY is in use. Set a secure SECRET_KEY in environment variables.")
-    if settings.ADMIN_INITIAL_PASSWORD == "AdminDevPassword123!":
-        raise ValueError("CRITICAL: Production environment detected, but default ADMIN_INITIAL_PASSWORD is in use. Set a secure ADMIN_INITIAL_PASSWORD in environment variables.")
+

@@ -1,7 +1,7 @@
 from typing import Optional
 from fastapi import APIRouter, Request, Depends, Form, status
 from fastapi.responses import HTMLResponse, RedirectResponse
-from fastapi.templating import Jinja2Templates
+from app.core.templates import templates
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.schemas.user import UserCreate
@@ -9,8 +9,6 @@ from app.services.auth_service import authenticate_user, create_user, get_user_b
 from app.core.security import create_access_token
 from app.web.dependencies import get_current_user_from_cookie
 from app.models.user import User
-
-templates = Jinja2Templates(directory="app/templates")
 
 router = APIRouter()
 
