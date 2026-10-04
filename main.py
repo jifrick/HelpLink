@@ -60,6 +60,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request: Request, exc: Exception):
+    print(f"UNHANDLED ROUTE ERROR: {exc}")
     if request.url.path.startswith("/api"):
         return JSONResponse(
             status_code=500,
