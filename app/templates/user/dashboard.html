@@ -8,11 +8,11 @@
   {% if submitted %}
     <div class="alert {% if submitted_status == 'rejected' %}alert-error{% elif submitted_status == 'pending' %}alert-warning{% else %}alert-success{% endif %} transition-base" style="margin-bottom: 2rem;">
       {% if submitted_status == 'pending' %}
-        ⏳ <strong>In Review:</strong> Your resource needs a quick additional review before it can be published.
+        <i data-lucide="clock" class="w-4 h-4 inline-block align-text-bottom mr-1"></i> <strong>In Review:</strong> Your resource needs a quick additional review before it can be published.
       {% elif submitted_status == 'rejected' %}
-        ❌ <strong>Not Approved:</strong> We couldn't publish this resource because it didn't pass our safety and quality checks.
+        <i data-lucide="x-circle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> <strong>Not Approved:</strong> We couldn't publish this resource because it didn't pass our safety and quality checks.
       {% else %}
-        🎉 <strong>Success!</strong> Your resource was reviewed automatically and published.
+        <i data-lucide="check-circle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-success"></i> <strong>Success!</strong> Your resource was reviewed automatically and published.
       {% endif %}
     </div>
   {% endif %}
@@ -24,7 +24,7 @@
       <!-- User Info -->
       <div class="flex flex-col justify-center gap-4" style="flex: 1 1 350px;">
         <h1 class="text-2xl font-extrabold text-brand flex items-center gap-3">
-          Welcome back, {{ current_user.full_name }} 👋
+          Welcome back, {{ current_user.full_name }}
           {% if current_user.trust_score > 70 %}
           <span class="badge badge-published" title="Trusted Contributor">✓ Trusted</span>
           {% endif %}
@@ -107,7 +107,7 @@
         </div>
         {% else %}
         <div class="empty-state">
-          <div class="empty-state-icon">🏆</div>
+          <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="award" class="w-12 h-12"></i></div>
           <h3 class="empty-state-title">No Badges Yet</h3>
           <p class="empty-state-desc">Your contribution journey starts here. Earn badges by sharing useful resources.</p>
           <a href="/submit" class="btn btn-outline btn-sm">Share a Resource</a>
@@ -151,7 +151,7 @@
         </div>
         {% else %}
         <div class="empty-state">
-          <div class="empty-state-icon">📝</div>
+          <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="file-plus" class="w-12 h-12"></i></div>
           <h3 class="empty-state-title">No Contributions</h3>
           <p class="empty-state-desc">Help someone discover something useful today.</p>
           <a href="/submit" class="btn btn-primary">Share your first resource</a>
@@ -167,7 +167,7 @@
       <div class="card card-hover transition-base">
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-bold text-brand flex items-center gap-2">
-            <span class="text-primary">✨</span> HelpPoints
+            <i data-lucide="coins" class="w-5 h-5 text-primary"></i> HelpPoints
           </h2>
           <a href="/rewards" class="btn btn-secondary btn-sm">Rewards &rarr;</a>
         </div>

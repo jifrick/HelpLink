@@ -51,16 +51,16 @@
           </div>
 
           <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm text-secondary bg-surface border border-border rounded-md p-3">
-            <div class="flex items-center gap-2"><span class="opacity-70">📍</span> <strong>Location:</strong> {{ res.location }}</div>
-            <div class="flex items-center gap-2"><span class="opacity-70">🔗</span> <strong>URL:</strong> <a href="{{ res.url }}" target="_blank" rel="noopener" class="text-primary hover:underline truncate max-w-[200px]">{{ res.url }}</a></div>
-            {% if res.contact %}<div class="flex items-center gap-2"><span class="opacity-70">📞</span> <strong>Contact:</strong> {{ res.contact }}</div>{% endif %}
+            <div class="flex items-center gap-2"><i data-lucide="map-pin" class="w-4 h-4 text-muted"></i> <strong>Location:</strong> {{ res.location }}</div>
+            <div class="flex items-center gap-2"><i data-lucide="link" class="w-4 h-4 text-muted"></i> <strong>URL:</strong> <a href="{{ res.url }}" target="_blank" rel="noopener" class="text-primary hover:underline truncate max-w-[200px]">{{ res.url }}</a></div>
+            {% if res.contact %}<div class="flex items-center gap-2"><i data-lucide="phone" class="w-4 h-4 text-muted"></i> <strong>Contact:</strong> {{ res.contact }}</div>{% endif %}
           </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
     <div class="empty-state py-16">
-      <div class="empty-state-icon">✅</div>
+      <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="check-circle" class="w-12 h-12"></i></div>
       <h3 class="empty-state-title">Moderation Queue is Clean</h3>
       <p class="empty-state-desc">All submitted resources have been processed.</p>
     </div>

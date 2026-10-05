@@ -7,7 +7,7 @@
   <div class="card w-full max-w-3xl border-t-4" style="border-top-color: var(--color-primary);">
     <div class="text-center mb-8">
       <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-light text-primary text-3xl mb-4">
-        📝
+        <i data-lucide="edit-3" class="w-8 h-8"></i>
       </div>
       <h1 class="text-3xl font-extrabold text-brand mb-2">Share a Resource</h1>
       <p class="text-secondary">
@@ -16,7 +16,7 @@
     </div>
 
     <div class="bg-surface-hover border border-border rounded-lg p-5 mb-8 flex gap-4">
-      <div class="text-2xl mt-0.5">🛡️</div>
+      <div class="mt-0.5 text-primary"><i data-lucide="shield-check" class="w-6 h-6"></i></div>
       <div>
         <h4 class="font-bold text-brand mb-1">Community Guidelines</h4>
         <p class="text-sm text-secondary leading-relaxed">
@@ -27,7 +27,7 @@
 
     {% if error %}
       <div class="alert alert-error transition-base mb-8">
-        ⚠️ {{ error }}
+        <i data-lucide="alert-triangle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> {{ error }}
       </div>
     {% endif %}
 

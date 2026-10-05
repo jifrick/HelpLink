@@ -8,7 +8,7 @@
   <div class="container">
     
     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-light border border-primary-border text-primary font-semibold text-sm mb-6 transition-transform hover:scale-105 cursor-default">
-      ✨ <span>Now with Community Gamification</span>
+      <i data-lucide="sparkles" class="w-4 h-4"></i> <span>Now with Community Gamification</span>
     </div>
 
     <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-brand leading-tight tracking-tight mb-6">
@@ -21,7 +21,7 @@
 
     <form action="/resources" method="GET" class="max-w-3xl mx-auto bg-surface p-2 rounded-xl shadow-lg border border-border flex flex-col md:flex-row gap-2 transition-base focus-within:border-primary focus-within:shadow-xl">
       <div class="flex-1 flex items-center gap-3 px-4 py-2">
-        <span class="text-xl opacity-60">🔍</span>
+        <i data-lucide="search" class="w-5 h-5 opacity-60"></i>
         <input type="text" name="q" class="w-full bg-transparent border-none outline-none text-brand text-lg" placeholder="Search scholarships, courses, Kozhikode jobs..." required>
       </div>
       <button type="submit" class="btn btn-primary btn-lg whitespace-nowrap">Search Resources</button>
@@ -52,15 +52,15 @@
       {% for cat in categories %}
         <a href="/resources?category={{ cat.slug }}" class="card card-hover flex flex-col gap-3 p-5">
           <div class="w-12 h-12 rounded-md bg-primary-light text-primary flex items-center justify-center text-2xl transition-transform group-hover:scale-110">
-            {% if cat.icon == 'book-open' %}📚
-            {% elif cat.icon == 'briefcase' %}💼
-            {% elif cat.icon == 'academic-cap' %}🎓
-            {% elif cat.icon == 'gift' %}🎁
-            {% elif cat.icon == 'heart' %}❤️
-            {% elif cat.icon == 'user-group' %}🤝
-            {% elif cat.icon == 'wrench-screwdriver' %}🛠️
-            {% elif cat.icon == 'calendar' %}📅
-            {% else %}📁{% endif %}
+            {% if cat.icon == 'book-open' %}<i data-lucide="book-open"></i>
+            {% elif cat.icon == 'briefcase' %}<i data-lucide="briefcase"></i>
+            {% elif cat.icon == 'academic-cap' %}<i data-lucide="graduation-cap"></i>
+            {% elif cat.icon == 'gift' %}<i data-lucide="gift"></i>
+            {% elif cat.icon == 'heart' %}<i data-lucide="heart"></i>
+            {% elif cat.icon == 'user-group' %}<i data-lucide="users"></i>
+            {% elif cat.icon == 'wrench-screwdriver' %}<i data-lucide="wrench"></i>
+            {% elif cat.icon == 'calendar' %}<i data-lucide="calendar"></i>
+            {% else %}<i data-lucide="folder"></i>{% endif %}
           </div>
           <div>
             <h3 class="text-lg font-bold text-brand mb-1">{{ cat.name }}</h3>
@@ -93,7 +93,7 @@
       {% else %}
         <div class="col-span-full">
           <div class="empty-state">
-            <div class="empty-state-icon">📄</div>
+            <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="file-text" class="w-12 h-12"></i></div>
             <h3 class="empty-state-title">No Resources Yet</h3>
             <p class="empty-state-desc">Be the first to share a verified opportunity with the community.</p>
             <a href="/submit" class="btn btn-primary">Submit a Resource</a>
@@ -120,7 +120,7 @@
       <div class="card card-hover p-8 relative overflow-hidden group">
         <div class="absolute -right-4 -top-4 text-8xl font-black text-bg-subtle opacity-50 transition-transform group-hover:scale-110">01</div>
         <div class="relative z-10">
-          <div class="text-4xl mb-4">🔍</div>
+          <div class="mb-4 text-primary"><i data-lucide="search" class="w-10 h-10"></i></div>
           <h3 class="text-xl font-bold text-brand mb-3">Discover</h3>
           <p class="text-secondary leading-relaxed">Search or filter across scholarships, jobs, courses, and local community support programs.</p>
         </div>
@@ -129,7 +129,7 @@
       <div class="card card-hover p-8 relative overflow-hidden group">
         <div class="absolute -right-4 -top-4 text-8xl font-black text-bg-subtle opacity-50 transition-transform group-hover:scale-110">02</div>
         <div class="relative z-10">
-          <div class="text-4xl mb-4">✨</div>
+          <div class="mb-4 text-primary"><i data-lucide="share" class="w-10 h-10"></i></div>
           <h3 class="text-xl font-bold text-brand mb-3">Share</h3>
           <p class="text-secondary leading-relaxed">Found a legitimate scholarship, free tool, or volunteer program? Submit it in seconds.</p>
         </div>
@@ -138,7 +138,7 @@
       <div class="card card-hover p-8 relative overflow-hidden group">
         <div class="absolute -right-4 -top-4 text-8xl font-black text-bg-subtle opacity-50 transition-transform group-hover:scale-110">03</div>
         <div class="relative z-10">
-          <div class="text-4xl mb-4">🛡️</div>
+          <div class="mb-4 text-primary"><i data-lucide="shield-check" class="w-10 h-10"></i></div>
           <h3 class="text-xl font-bold text-brand mb-3">Help Others</h3>
           <p class="text-secondary leading-relaxed">Every submission goes through community moderation to ensure high quality and zero spam.</p>
         </div>
@@ -151,9 +151,7 @@
 <section class="py-12 mb-12">
   <div class="container">
     <div class="rounded-2xl p-10 md:p-16 text-center shadow-xl relative overflow-hidden" style="background: linear-gradient(135deg, var(--color-brand), #1E293B);">
-      <!-- Abstract shapes -->
-      <div class="absolute top-0 right-0 w-64 h-64 bg-primary rounded-full filter blur-3xl opacity-20 -translate-y-1/2 translate-x-1/3"></div>
-      <div class="absolute bottom-0 left-0 w-64 h-64 bg-success rounded-full filter blur-3xl opacity-20 translate-y-1/2 -translate-x-1/3"></div>
+      <!-- Clean background without glowing orbs -->
       
       <div class="relative z-10">
         <h2 class="text-3xl md:text-4xl font-extrabold text-white tracking-tight mb-4">Know a useful opportunity or resource?</h2>

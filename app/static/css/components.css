@@ -130,8 +130,8 @@
 }
 .card-hover:hover {
   border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-1px);
 }
 
 /* Resource Card */
@@ -154,8 +154,8 @@
 }
 .resource-card:hover {
   border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 .card-top {
   display: flex;
@@ -331,7 +331,7 @@
   padding: var(--space-6);
   box-shadow: var(--shadow-xl);
   transform: scale(0.95);
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 .modal-overlay.active .modal-content {
   transform: scale(1);
@@ -366,16 +366,16 @@
 }
 .reward-card:hover, .badge-card:hover {
   border-color: var(--color-border-hover);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
 }
 .badge-icon {
   font-size: 3rem;
   margin-bottom: var(--space-3);
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
 }
 .badge-card:hover .badge-icon {
-  transform: scale(1.1);
+  transform: scale(1.05);
 }
 .locked-badge {
   filter: grayscale(100%);

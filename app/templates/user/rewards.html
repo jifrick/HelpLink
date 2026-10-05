@@ -7,13 +7,13 @@
 
   {% if redeemed %}
     <div class="alert alert-success transition-base mb-6">
-      🎉 <strong>Reward Claimed!</strong> You have successfully redeemed a reward. Check your redemptions below.
+      <i data-lucide="party-popper" class="w-4 h-4 inline-block align-text-bottom mr-1 text-success"></i> <strong>Reward Claimed!</strong> You have successfully redeemed a reward. Check your redemptions below.
     </div>
   {% endif %}
   
   {% if error %}
     <div class="alert alert-error transition-base mb-6">
-      ⚠️ <strong>Oops!</strong> {{ error }}
+      <i data-lucide="alert-triangle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> <strong>Oops!</strong> {{ error }}
     </div>
   {% endif %}
 
@@ -57,7 +57,7 @@
       </div>
     {% else %}
       <div class="empty-state">
-        <div class="empty-state-icon">🎁</div>
+        <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="gift" class="w-12 h-12"></i></div>
         <h3 class="empty-state-title">No Rewards Available</h3>
         <p class="empty-state-desc">We're working on stocking the store. Check back soon!</p>
       </div>
@@ -99,7 +99,7 @@
       </div>
     {% else %}
       <div class="empty-state">
-        <div class="empty-state-icon">🎟️</div>
+        <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="ticket" class="w-12 h-12"></i></div>
         <h3 class="empty-state-title">No Redemptions Yet</h3>
         <p class="empty-state-desc">Use your HelpPoints to unlock community rewards.</p>
         <a href="#available" class="btn btn-primary btn-sm">Explore Rewards</a>
@@ -113,7 +113,7 @@
 <div id="redeemModal" class="modal-overlay">
   <div class="modal-content">
     <div class="flex items-center justify-center mb-4 text-4xl text-primary opacity-90">
-      🎁
+      <i data-lucide="gift" class="w-12 h-12"></i>
     </div>
     
     <h3 class="text-xl font-bold text-center text-brand mb-2">Confirm Redemption</h3>

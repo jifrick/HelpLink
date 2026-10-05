@@ -15,15 +15,15 @@
     {% for cat in categories %}
       <a href="/resources?category={{ cat.slug }}" class="category-card" style="padding: 2rem;">
         <div class="category-icon" style="width: 54px; height: 54px; font-size: 1.75rem;">
-          {% if cat.icon == 'book-open' %}📚
-          {% elif cat.icon == 'briefcase' %}💼
-          {% elif cat.icon == 'academic-cap' %}🎓
-          {% elif cat.icon == 'gift' %}🎁
-          {% elif cat.icon == 'heart' %}❤️
-          {% elif cat.icon == 'user-group' %}🤝
-          {% elif cat.icon == 'wrench-screwdriver' %}🛠️
-          {% elif cat.icon == 'calendar' %}📅
-          {% else %}📁{% endif %}
+          {% if cat.icon == 'book-open' %}<i data-lucide="book-open"></i>
+          {% elif cat.icon == 'briefcase' %}<i data-lucide="briefcase"></i>
+          {% elif cat.icon == 'academic-cap' %}<i data-lucide="graduation-cap"></i>
+          {% elif cat.icon == 'gift' %}<i data-lucide="gift"></i>
+          {% elif cat.icon == 'heart' %}<i data-lucide="heart"></i>
+          {% elif cat.icon == 'user-group' %}<i data-lucide="users"></i>
+          {% elif cat.icon == 'wrench-screwdriver' %}<i data-lucide="wrench"></i>
+          {% elif cat.icon == 'calendar' %}<i data-lucide="calendar"></i>
+          {% else %}<i data-lucide="folder"></i>{% endif %}
         </div>
         <div>
           <h3 class="category-name" style="font-size: 1.25rem;">{{ cat.name }}</h3>

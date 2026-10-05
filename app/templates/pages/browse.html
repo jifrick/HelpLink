@@ -10,7 +10,7 @@
     <aside class="w-full lg:w-72 flex-shrink-0">
       <div class="card sticky top-24">
         <div class="flex items-center gap-2 mb-6 text-brand">
-          <span class="text-xl">⚙️</span>
+          <i data-lucide="sliders-horizontal" class="w-5 h-5 text-muted"></i>
           <h3 class="text-lg font-bold">Filter Resources</h3>
         </div>
 
@@ -51,7 +51,7 @@
 
           <div class="flex gap-2 mt-2">
             <button type="submit" class="btn btn-primary flex-1">Apply</button>
-            <a href="/resources" class="btn btn-secondary px-3" title="Reset Filters">↻</a>
+            <a href="/resources" class="btn btn-secondary px-3" title="Reset Filters"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></a>
           </div>
         </form>
       </div>
@@ -86,7 +86,7 @@
         {% else %}
           <div class="col-span-full">
             <div class="empty-state py-20">
-              <div class="empty-state-icon text-5xl mb-6">🔎</div>
+              <div class="empty-state-icon flex justify-center text-muted mb-6"><i data-lucide="search-x" class="w-12 h-12"></i></div>
               <h3 class="empty-state-title text-xl">No resources match your search</h3>
               <p class="empty-state-desc mt-2">Try clearing filters or searching for alternative keywords like "scholarship", "course", or "internship".</p>
               <a href="/resources" class="btn btn-primary mt-4">Clear All Filters</a>
