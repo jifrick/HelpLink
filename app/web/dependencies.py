@@ -7,6 +7,8 @@ from app.core.security import decode_access_token
 from app.services.auth_service import get_user_by_id
 from app.models.user import User
 
+from app.core.config import settings
+
 def get_current_user_from_cookie(request: Request, db: Session = Depends(get_db)) -> Optional[User]:
     """Retrieve logged-in user from HTTP-only session cookie or Bearer token header."""
     token = request.cookies.get("helplink_session")
@@ -16,20 +18,29 @@ def get_current_user_from_cookie(request: Request, db: Session = Depends(get_db)
     if not token and auth_header and auth_header.startswith("Bearer "):
         token = auth_header.split(" ")[1]
 
-    if not token:
-        return None
+    if token:
+        payload = decode_access_token(token)
+        if payload and "sub" in payload:
+            try:
+                user_id = int(payload["sub"])
+                user = get_user_by_id(db, user_id)
+                if user and user.is_active:
+                    return user
+            except ValueError:
+                pass
 
-    payload = decode_access_token(token)
-    if not payload or "sub" not in payload:
-        return None
-
-    try:
-        user_id = int(payload["sub"])
-        user = get_user_by_id(db, user_id)
-        if user and user.is_active:
-            return user
-    except ValueError:
-        pass
+    # Development-only authentication bypass
+    if settings.ENV == "development" and settings.AUTH_BYPASS_ENABLED:
+        dev_admin = db.query(User).filter(User.role == "admin").first()
+        if dev_admin:
+            return dev_admin
+        return User(
+            id=999999,
+            email="dev.admin@helplink.local",
+            full_name="Dev Admin User",
+            role="admin",
+            is_active=True
+        )
 
     return None
 

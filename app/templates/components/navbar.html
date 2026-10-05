@@ -3,6 +3,9 @@
     <a href="/" class="brand-logo">
       <div class="brand-icon">H</div>
       <span>HelpLink</span>
+      {% if current_user and (current_user.email == 'dev.admin@helplink.local' or dev_auth_bypass) %}
+        <span style="background: #FEF3C7; color: #92400E; font-size: 0.70rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #FCD34D; margin-left: 6px;">⚡ DEV AUTH MODE</span>
+      {% endif %}
     </a>
 
     <nav>
