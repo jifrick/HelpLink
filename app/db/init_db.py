@@ -114,9 +114,33 @@ SAMPLE_RESOURCES = [
     }
 ]
 
+from sqlalchemy import text
+
+def ensure_schema_migrations(db: Session):
+    """Ensure newly added columns (supabase_uid, avatar_url) exist on existing tables."""
+    try:
+        bind = db.get_bind()
+        dialect_name = bind.dialect.name if bind else ""
+        if dialect_name == "postgresql":
+            db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS supabase_uid VARCHAR(255);"))
+            db.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(512);"))
+            db.execute(text("ALTER TABLE users ALTER COLUMN password_hash DROP NOT NULL;"))
+            db.commit()
+        elif dialect_name == "sqlite":
+            for col, col_type in [("supabase_uid", "VARCHAR(255)"), ("avatar_url", "VARCHAR(512)")]:
+                try:
+                    db.execute(text(f"ALTER TABLE users ADD COLUMN {col} {col_type};"))
+                    db.commit()
+                except Exception:
+                    db.rollback()
+    except Exception as e:
+        db.rollback()
+
 def init_db(db: Session):
-    # Create tables
+    # Create tables if not exist
     Base.metadata.create_all(bind=engine)
+    ensure_schema_migrations(db)
+
 
     # 1. Seed Categories
     category_map = {}

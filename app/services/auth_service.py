@@ -26,8 +26,58 @@ def create_user(db: Session, user_in: UserCreate, role: str = "user") -> User:
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     user = get_user_by_email(db, email)
-    if not user:
+    if not user or not user.password_hash:
         return None
     if not verify_password(password, user.password_hash):
         return None
     return user
+
+def get_user_by_supabase_uid(db: Session, supabase_uid: str) -> Optional[User]:
+    return db.query(User).filter(User.supabase_uid == supabase_uid).first()
+
+def sync_oauth_user(
+    db: Session,
+    supabase_uid: str,
+    email: str,
+    full_name: Optional[str] = None,
+    avatar_url: Optional[str] = None
+) -> User:
+    clean_email = email.lower().strip()
+    
+    # 1. Search by supabase_uid
+    user = get_user_by_supabase_uid(db, supabase_uid)
+    
+    if not user:
+        # 2. Search by email if not linked yet
+        user = get_user_by_email(db, clean_email)
+        if user:
+            user.supabase_uid = supabase_uid
+            if avatar_url and not user.avatar_url:
+                user.avatar_url = avatar_url
+            db.commit()
+            db.refresh(user)
+            return user
+        
+        # 3. Create new HelpLink user with role="user"
+        display_name = (full_name or clean_email.split("@")[0]).strip()
+        user = User(
+            email=clean_email,
+            full_name=display_name,
+            supabase_uid=supabase_uid,
+            avatar_url=avatar_url,
+            password_hash=None,
+            role="user",
+            is_active=True
+        )
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+    else:
+        # Returning user: sync avatar if updated
+        if avatar_url and user.avatar_url != avatar_url:
+            user.avatar_url = avatar_url
+            db.commit()
+            db.refresh(user)
+
+    return user
+

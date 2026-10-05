@@ -21,6 +21,8 @@ venv.bak/
 *.env
 .env.*
 !.env.example
+secrets/
+
 
 # Testing & Coverage
 .pytest_cache/

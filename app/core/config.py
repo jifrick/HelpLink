@@ -13,8 +13,19 @@ class Settings(BaseSettings):
     ADMIN_INITIAL_EMAIL: str = "admin@helplink.org"
     ADMIN_INITIAL_PASSWORD: str = "AdminDevPassword123!"
 
+    # Supabase Auth Configuration
+    SUPABASE_URL: str = ""
+    SUPABASE_KEY: str = ""
+    SUPABASE_ANON_KEY: str = ""
+    SUPABASE_SERVICE_ROLE_KEY: str = ""
+
     # Development Auth Bypass (Development Mode Only)
     AUTH_BYPASS_ENABLED: bool = False
+
+    @property
+    def effective_supabase_key(self) -> str:
+        return self.SUPABASE_ANON_KEY or self.SUPABASE_KEY
+
 
     model_config = SettingsConfigDict(
         env_file=".env",
