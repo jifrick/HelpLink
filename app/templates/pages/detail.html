@@ -5,112 +5,113 @@
 {% block og_title %}{{ resource.title }} — HelpLink Community Network{% endblock %}
 
 {% block content %}
-<div class="container detail-container">
+<div class="container py-8 md:py-12 max-w-4xl">
 
   {% if request.query_params.get("reported") %}
-    <div class="alert alert-success alert-dismissible">
+    <div class="alert alert-success transition-base mb-6">
       ✅ Report submitted successfully. Our admin moderation team will review this resource shortly.
     </div>
   {% endif %}
 
   <!-- Breadcrumb -->
-  <nav class="breadcrumb" aria-label="Breadcrumb navigation">
-    <a href="/">Home</a> &rsaquo;
-    <a href="/resources">Resources</a> &rsaquo;
+  <nav class="flex items-center gap-2 text-sm text-secondary mb-6 overflow-x-auto whitespace-nowrap pb-2" aria-label="Breadcrumb navigation">
+    <a href="/" class="hover:text-primary transition-base">Home</a> <span class="text-muted">/</span>
+    <a href="/resources" class="hover:text-primary transition-base">Resources</a> <span class="text-muted">/</span>
     {% if resource.category %}
-      <a href="/resources?category={{ resource.category.slug }}">{{ resource.category.name }}</a> &rsaquo;
+      <a href="/resources?category={{ resource.category.slug }}" class="hover:text-primary transition-base">{{ resource.category.name }}</a> <span class="text-muted">/</span>
     {% endif %}
-    <span style="color: var(--color-text-main); font-weight: 500;">{{ resource.title }}</span>
+    <span class="text-brand font-medium truncate">{{ resource.title }}</span>
   </nav>
 
   <!-- Detail Card -->
-  <article class="detail-card">
-    <div class="detail-header">
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-        <div class="badge-group">
+  <article class="card p-6 md:p-10 mb-10">
+    <div class="border-b border-border pb-6 mb-6">
+      <div class="flex items-start justify-between flex-wrap gap-4 mb-4">
+        <div class="flex flex-wrap items-center gap-2">
           {% if resource.category %}
-            <span class="badge badge-category">{{ resource.category.name }}</span>
+            <span class="px-2.5 py-1 text-xs font-bold bg-primary-light text-primary rounded-full">{{ resource.category.name }}</span>
           {% endif %}
-          <span class="badge badge-type">{{ resource.resource_type }}</span>
-          <span class="badge badge-location">📍 {{ resource.location }}</span>
+          <span class="px-2.5 py-1 text-xs font-bold bg-bg-subtle text-secondary border border-border rounded-full">{{ resource.resource_type }}</span>
+          <span class="px-2.5 py-1 text-xs font-bold bg-success-light text-success rounded-full">📍 {{ resource.location }}</span>
         </div>
 
-        <button class="btn btn-sm btn-secondary btn-save-toggle {% if is_saved %}saved{% endif %}" data-resource-id="{{ resource.id }}" aria-label="Bookmark resource">
+        <button class="btn btn-sm btn-outline border-border hover:border-danger hover:text-danger hover:bg-danger-light btn-save-toggle {% if is_saved %}saved !border-danger !bg-danger-light !text-danger{% endif %}" data-resource-id="{{ resource.id }}" aria-label="Bookmark resource">
           {% if is_saved %}❤️ Saved{% else %}🤍 Save{% endif %}
         </button>
       </div>
 
-      <h1 class="detail-title">{{ resource.title }}</h1>
+      <h1 class="text-3xl md:text-4xl font-extrabold text-brand leading-tight mb-4">{{ resource.title }}</h1>
 
-      <div style="display: flex; align-items: center; gap: 1rem; font-size: 0.88rem; color: var(--color-text-muted); flex-wrap: wrap;">
-        <span>Submitted on {{ resource.created_at.strftime('%B %d, %Y') }}</span>
+      <div class="flex items-center gap-4 text-sm text-muted flex-wrap">
+        <span class="flex items-center gap-1">🕒 Submitted on <span class="text-secondary font-medium tabular-nums">{{ resource.created_at.strftime('%B %d, %Y') }}</span></span>
         {% if resource.submitter %}
-          <span>&bull; Shared by {{ resource.submitter.full_name }}</span>
+          <span class="hidden md:inline">•</span>
+          <span class="flex items-center gap-1">👤 Shared by <span class="text-secondary font-medium">{{ resource.submitter.full_name }}</span></span>
         {% endif %}
       </div>
     </div>
 
     <!-- Metadata Grid -->
-    <div class="detail-meta-grid">
+    <div class="bg-bg-subtle border border-border rounded-lg p-5 mb-8 grid grid-cols-1 sm:grid-cols-3 gap-6">
       <div>
-        <div class="meta-item-label">Location</div>
-        <div class="meta-item-value">📍 {{ resource.location }}</div>
+        <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Location</div>
+        <div class="text-base font-semibold text-brand">📍 {{ resource.location }}</div>
       </div>
       <div>
-        <div class="meta-item-label">Resource Type</div>
-        <div class="meta-item-value">{{ resource.resource_type }}</div>
+        <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Resource Type</div>
+        <div class="text-base font-semibold text-brand">{{ resource.resource_type }}</div>
       </div>
       {% if resource.contact %}
         <div>
-          <div class="meta-item-label">Contact / Organization</div>
-          <div class="meta-item-value">{{ resource.contact }}</div>
+          <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Contact / Org</div>
+          <div class="text-base font-semibold text-brand">{{ resource.contact }}</div>
         </div>
       {% endif %}
     </div>
 
     <!-- Body Description -->
-    <div class="detail-body">
-      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.75rem;">About this Opportunity</h2>
-      <p style="white-space: pre-line;">{{ resource.description }}</p>
+    <div class="mb-8">
+      <h2 class="text-xl font-bold text-brand mb-3">About this Opportunity</h2>
+      <div class="text-base text-secondary leading-relaxed whitespace-pre-line">{{ resource.description }}</div>
     </div>
 
     <!-- Tags -->
     {% if resource.tags %}
-      <div style="margin-bottom: 2rem;">
-        <div style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 0.5rem;">Associated Tags:</div>
-        <div style="display: flex; flex-wrap: wrap; gap: 0.4rem;">
+      <div class="mb-8">
+        <div class="text-sm font-semibold text-muted mb-2">Associated Tags:</div>
+        <div class="flex flex-wrap gap-2">
           {% for tag in resource.tags %}
-            <a href="/resources?q={{ tag.name }}" class="pill-tag">#{{ tag.name }}</a>
+            <a href="/resources?q={{ tag.name }}" class="px-3 py-1 bg-surface border border-border rounded-full text-xs font-medium text-secondary hover:text-primary hover:border-primary-border transition-base">#{{ tag.name }}</a>
           {% endfor %}
         </div>
       </div>
     {% endif %}
 
     <!-- Outbound CTA & Share Bar -->
-    <div class="action-bar-large">
-      <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg" aria-label="Visit external website for {{ resource.title }}" style="box-shadow: var(--shadow-md);">
+    <div class="flex flex-col md:flex-row md:items-center justify-between pt-6 border-t border-border gap-4">
+      <a href="{{ resource.url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg flex-1 justify-center text-center shadow-md">
         Visit External Resource &nearr;
       </a>
 
-      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-        <button class="btn btn-secondary btn-share" data-title="{{ resource.title }}" data-url="{{ request.url }}" aria-label="Share resource link">
-          🔗 Share Link
+      <div class="flex gap-3">
+        <button class="btn btn-secondary btn-share flex-1 justify-center" data-title="{{ resource.title }}" data-url="{{ request.url }}" aria-label="Share resource link">
+          🔗 Share
         </button>
-        <button id="open-report-modal" class="btn btn-outline" style="color: var(--color-text-muted); border-color: var(--color-border);" aria-label="Report resource issue">
-          ⚠️ Report Issue
+        <button id="open-report-modal" class="btn btn-outline border-border text-muted hover:text-danger hover:border-danger hover:bg-danger-light flex-1 justify-center" aria-label="Report resource issue">
+          ⚠️ Report
         </button>
       </div>
     </div>
 
-    <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 1rem;">
-      Note: HelpLink is a discovery index. Clicking 'Visit External Resource' will open the external official website.
+    <p class="text-xs text-muted mt-4 text-center">
+      Note: HelpLink is a discovery index. Clicking 'Visit External Resource' will open the official website.
     </p>
   </article>
 
   <!-- Related Resources -->
   {% if related_resources %}
-    <section style="margin-top: 3rem;">
-      <h2 class="section-title" style="font-size: 1.4rem; margin-bottom: 1.25rem;">Related Opportunities</h2>
+    <section class="mt-12">
+      <h2 class="text-2xl font-bold text-brand mb-6">Related Opportunities</h2>
       <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
         {% for res in related_resources %}
           {% include "components/resource_card.html" %}
@@ -123,15 +124,16 @@
 <!-- Report Issue Modal -->
 <div id="report-modal" class="modal-overlay" role="dialog" aria-labelledby="report-modal-title" aria-modal="true">
   <div class="modal-content">
-    <h3 id="report-modal-title" style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">Report this Resource</h3>
-    <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 1.5rem;">
-      Help us maintain high platform quality. Reports are reviewed by moderators.
+    <div class="text-3xl text-danger mb-3">⚠️</div>
+    <h3 id="report-modal-title" class="text-xl font-bold text-brand mb-2">Report this Resource</h3>
+    <p class="text-sm text-secondary mb-6">
+      Help us maintain high platform quality. Reports are reviewed manually by our moderation team.
     </p>
 
-    <form action="/resources/{{ resource.id }}/report" method="POST">
-      <div class="form-group">
-        <label class="form-label">Reason for report</label>
-        <select name="reason" class="form-select" required>
+    <form action="/resources/{{ resource.id }}/report" method="POST" class="m-0">
+      <div class="form-group mb-4">
+        <label class="form-label block mb-2">Reason for report</label>
+        <select name="reason" class="form-select py-2.5" required>
           <option value="broken_link">Broken or dead external link</option>
           <option value="incorrect">Incorrect or outdated information</option>
           <option value="spam">Spam or self-promotional content</option>
@@ -142,14 +144,14 @@
         </select>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">Additional Details (Optional)</label>
-        <textarea name="details" class="form-textarea" rows="3" placeholder="Provide extra context for moderators..."></textarea>
+      <div class="form-group mb-6">
+        <label class="form-label block mb-2">Additional Details <span class="font-normal text-muted">(Optional)</span></label>
+        <textarea name="details" class="form-textarea py-2.5" rows="3" placeholder="Provide extra context for moderators..."></textarea>
       </div>
 
-      <div style="display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem;">
-        <button type="button" id="close-report-modal" class="btn btn-secondary">Cancel</button>
-        <button type="submit" class="btn btn-danger">Submit Report</button>
+      <div class="flex gap-3 justify-end">
+        <button type="button" id="close-report-modal" class="btn btn-secondary w-full md:w-auto justify-center">Cancel</button>
+        <button type="submit" class="btn btn-danger w-full md:w-auto justify-center">Submit Report</button>
       </div>
     </form>
   </div>

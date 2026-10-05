@@ -1,48 +1,49 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Contributors — Admin{% endblock %}
+{% block title %}Contributors — Admin HelpLink{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+<div class="container py-8 md:py-12">
 
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+  <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
     <div>
-      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">Contributors</h1>
-      <p style="color: var(--color-text-secondary);">Manage users, points, and gamification status</p>
+      <h1 class="text-2xl font-extrabold text-brand mb-1">Contributors</h1>
+      <p class="text-secondary text-sm">Manage users, points, and gamification status</p>
     </div>
+    <a href="/admin/dashboard" class="btn btn-secondary btn-sm">&larr; Back to Dashboard</a>
   </div>
 
-  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden;">
-    <div class="table-responsive">
-      <table class="admin-table" style="margin-bottom: 0;">
+  <div class="card overflow-hidden !p-0">
+    <div class="table-responsive !border-0 rounded-none">
+      <table class="admin-table !mb-0 w-full">
         <thead>
           <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Level</th>
-            <th>HelpPoints</th>
-            <th>Trust Score</th>
-            <th>Status</th>
-            <th>Actions</th>
+            <th class="px-6 py-4">ID</th>
+            <th class="px-6 py-4">Name</th>
+            <th class="px-6 py-4">Level</th>
+            <th class="px-6 py-4 text-right">HelpPoints</th>
+            <th class="px-6 py-4 text-center">Trust Score</th>
+            <th class="px-6 py-4">Status</th>
+            <th class="px-6 py-4 text-right">Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody class="divide-y divide-border">
           {% for u in users %}
-            <tr>
-              <td style="font-family: monospace; font-size: 0.9rem;">{{ u.contributor_id }}</td>
-              <td style="font-weight: 600;">{{ u.full_name }}</td>
-              <td><span class="badge badge-published">{{ u.level }}</span></td>
-              <td style="font-weight: 700; color: var(--color-primary);">{{ u.helppoints_balance }}</td>
-              <td>
-                <span style="font-weight: 600; color: {% if u.trust_score > 70 %}var(--color-success){% elif u.trust_score < 30 %}var(--color-danger){% else %}var(--color-text){% endif %}">
+            <tr class="transition-base hover:bg-surface-hover">
+              <td class="px-6 py-4 text-xs font-mono text-muted">{{ u.contributor_id }}</td>
+              <td class="px-6 py-4 font-bold text-brand">{{ u.full_name }}</td>
+              <td class="px-6 py-4"><span class="badge badge-category">{{ u.level }}</span></td>
+              <td class="px-6 py-4 font-extrabold text-primary text-right tabular-nums">{{ u.helppoints_balance }}</td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-flex items-center justify-center font-bold tabular-nums px-2 py-1 rounded-md {% if u.trust_score > 70 %}bg-success-light text-success{% elif u.trust_score < 30 %}bg-danger-light text-danger{% else %}bg-bg-subtle text-secondary{% endif %}">
                   {{ u.trust_score }}
                 </span>
               </td>
-              <td>
+              <td class="px-6 py-4">
                 <span class="badge badge-{{ 'published' if u.account_status == 'ACTIVE' else 'rejected' }}">{{ u.account_status }}</span>
               </td>
-              <td>
-                <a href="/admin/contributors/{{ u.id }}" class="btn btn-secondary btn-sm">Inspect</a>
+              <td class="px-6 py-4 text-right">
+                <a href="/admin/contributors/{{ u.id }}" class="btn btn-secondary btn-sm">Inspect &rarr;</a>
               </td>
             </tr>
           {% endfor %}

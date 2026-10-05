@@ -12,6 +12,30 @@
   <meta property="og:type" content="website">
 
   <!-- Styles -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: 'var(--color-brand)',
+            primary: { DEFAULT: 'var(--color-primary)', hover: 'var(--color-primary-hover)', light: 'var(--color-primary-light)', soft: 'var(--color-primary-soft)', border: 'var(--color-primary-border)' },
+            success: { DEFAULT: 'var(--color-success)', hover: 'var(--color-success-hover)', light: 'var(--color-success-light)' },
+            warning: { DEFAULT: 'var(--color-warning)', hover: 'var(--color-warning-hover)', light: 'var(--color-warning-light)' },
+            danger: { DEFAULT: 'var(--color-danger)', hover: 'var(--color-danger-hover)', light: 'var(--color-danger-light)' },
+            bg: { DEFAULT: 'var(--color-bg)', subtle: 'var(--color-bg-subtle)' },
+            surface: { DEFAULT: 'var(--color-surface)', hover: 'var(--color-surface-hover)', elevated: 'var(--color-surface-elevated)' },
+            text: { main: 'var(--color-text-main)', secondary: 'var(--color-text-secondary)', muted: 'var(--color-text-muted)', disabled: 'var(--color-text-disabled)' },
+            border: { DEFAULT: 'var(--color-border)', hover: 'var(--color-border-hover)' }
+          },
+          fontFamily: {
+            sans: 'var(--font-sans)',
+            mono: 'var(--font-mono)',
+          }
+        }
+      }
+    }
+  </script>
   <link rel="stylesheet" href="/static/css/main.css">
   <link rel="stylesheet" href="/static/css/components.css">
 </head>

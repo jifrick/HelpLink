@@ -1,177 +1,189 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Admin Dashboard — HelpLink Moderation{% endblock %}
+{% block title %}Admin Command Center — HelpLink{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+<div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
+  
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8 flex-wrap gap-4">
     <div>
-      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">Admin Moderation Dashboard</h1>
-      <p style="color: var(--color-text-secondary);">Overview of platform metrics, pending submissions, and community reports</p>
+      <h1 class="text-2xl font-extrabold text-brand mb-2">Command Center</h1>
+      <p class="text-secondary text-sm">System oversight, platform metrics, and community moderation.</p>
     </div>
 
-    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-      <a href="/admin/dashboard" class="btn btn-outline btn-sm" style="border-color: var(--color-brand); color: var(--color-brand);">Overview</a>
-      <a href="/admin/moderation" class="btn btn-outline btn-sm">Moderation Queue</a>
-      <a href="/admin/contributors" class="btn btn-outline btn-sm">Contributors & Points</a>
-      <a href="/admin/rewards" class="btn btn-outline btn-sm">Rewards</a>
-      <a href="/admin/fraud-events" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-danger);">Fraud Events</a>
-      <a href="/admin/reports" class="btn btn-outline btn-sm">Reports</a>
-      <a href="/admin/categories" class="btn btn-outline btn-sm">Categories</a>
-      <a href="/admin/audit-logs" class="btn btn-outline btn-sm">Audit Logs</a>
+    <div class="flex flex-wrap gap-2">
+      <a href="/admin/dashboard" class="btn btn-sm btn-primary">Overview</a>
+      <a href="/admin/moderation" class="btn btn-sm btn-outline">Moderation Queue</a>
+      <a href="/admin/contributors" class="btn btn-sm btn-outline">Contributors</a>
+      <a href="/admin/rewards" class="btn btn-sm btn-outline">Rewards</a>
+      <a href="/admin/fraud-events" class="btn btn-sm btn-outline" style="color: var(--color-danger); border-color: var(--color-danger-border);">Fraud Events</a>
+      <a href="/admin/reports" class="btn btn-sm btn-outline">Reports</a>
+      <a href="/admin/categories" class="btn btn-sm btn-outline">Categories</a>
+      <a href="/admin/audit-logs" class="btn btn-sm btn-outline">Audit Logs</a>
     </div>
   </div>
 
-  <!-- Content Metrics Row -->
-  <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Content & Moderation</h2>
-  <div class="metrics-row" style="margin-bottom: 2rem;">
-    <div class="metric-card">
-      <div class="meta-item-label">Total Resources</div>
-      <div class="metric-value">{{ metrics.total_resources }}</div>
+  <!-- Content & Moderation Metrics Row -->
+  <h2 class="text-lg font-bold text-brand mb-4">Content & Moderation</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4);">
+    <div class="card card-hover flex flex-col justify-between">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Total Resources</div>
+      <div class="text-3xl font-extrabold text-brand tabular-nums">{{ metrics.total_resources }}</div>
     </div>
-    <div class="metric-card" style="border-left: 4px solid var(--color-amber);">
-      <div class="meta-item-label">Pending Submissions</div>
-      <div class="metric-value" style="color: var(--color-amber);">{{ metrics.pending_submissions }}</div>
+    
+    <div class="card card-hover flex flex-col justify-between" style="border-bottom: 4px solid var(--color-warning);">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Pending Submissions</div>
+      <div class="text-3xl font-extrabold text-warning tabular-nums">{{ metrics.pending_submissions }}</div>
     </div>
-    <div class="metric-card" style="border-left: 4px solid var(--color-accent-emerald);">
-      <div class="meta-item-label">Published Resources</div>
-      <div class="metric-value" style="color: var(--color-accent-emerald);">{{ metrics.published_resources }}</div>
+    
+    <div class="card card-hover flex flex-col justify-between" style="border-bottom: 4px solid var(--color-success);">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Published Resources</div>
+      <div class="text-3xl font-extrabold text-success tabular-nums">{{ metrics.published_resources }}</div>
     </div>
-    <div class="metric-card" style="border-left: 4px solid var(--color-danger);">
-      <div class="meta-item-label">Pending Reports</div>
-      <div class="metric-value" style="color: var(--color-danger);">{{ metrics.total_reports }}</div>
+    
+    <div class="card card-hover flex flex-col justify-between" style="border-bottom: 4px solid var(--color-danger);">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Pending Reports</div>
+      <div class="text-3xl font-extrabold text-danger tabular-nums">{{ metrics.total_reports }}</div>
     </div>
-    <div class="metric-card">
-      <div class="meta-item-label">Categories</div>
-      <div class="metric-value">{{ metrics.total_categories }}</div>
+    
+    <div class="card card-hover flex flex-col justify-between">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Categories</div>
+      <div class="text-3xl font-extrabold text-brand tabular-nums">{{ metrics.total_categories }}</div>
     </div>
   </div>
 
   <!-- Gamification & Community Metrics Row -->
-  <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Gamification & Community</h2>
-  <div class="metrics-row" style="margin-bottom: 3.5rem;">
-    <div class="metric-card">
-      <div class="meta-item-label">Total Contributors</div>
-      <div class="metric-value">{{ metrics.total_contributors }}</div>
+  <h2 class="text-lg font-bold text-brand mb-4">Gamification & Community</h2>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-10" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4);">
+    <div class="card card-hover flex flex-col justify-between">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Total Contributors</div>
+      <div class="text-3xl font-extrabold text-brand tabular-nums">{{ metrics.total_contributors }}</div>
     </div>
-    <div class="metric-card">
-      <div class="meta-item-label">Active / Banned</div>
-      <div class="metric-value"><span style="color: var(--color-success);">{{ metrics.active_contributors }}</span> / <span style="color: var(--color-danger);">{{ metrics.banned_users }}</span></div>
+    
+    <div class="card card-hover flex flex-col justify-between">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Active / Banned</div>
+      <div class="text-3xl font-extrabold tabular-nums"><span class="text-success">{{ metrics.active_contributors }}</span> <span class="text-muted text-xl">/</span> <span class="text-danger">{{ metrics.banned_users }}</span></div>
     </div>
-    <div class="metric-card" style="border-left: 4px solid var(--color-primary);">
-      <div class="meta-item-label">HP Awarded</div>
-      <div class="metric-value" style="color: var(--color-primary);">{{ metrics.total_hp_awarded }}</div>
+    
+    <div class="card card-hover flex flex-col justify-between" style="border-bottom: 4px solid var(--color-primary);">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">HP Awarded</div>
+      <div class="text-3xl font-extrabold text-primary tabular-nums">{{ metrics.total_hp_awarded }}</div>
     </div>
-    <div class="metric-card" style="border-left: 4px solid var(--color-brand);">
-      <div class="meta-item-label">HP Redeemed</div>
-      <div class="metric-value" style="color: var(--color-brand);">{{ metrics.total_hp_redeemed }}</div>
+    
+    <div class="card card-hover flex flex-col justify-between" style="border-bottom: 4px solid var(--color-brand);">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">HP Redeemed</div>
+      <div class="text-3xl font-extrabold text-brand tabular-nums">{{ metrics.total_hp_redeemed }}</div>
     </div>
-    <div class="metric-card" style="border-left: 4px solid var(--color-danger);">
-      <div class="meta-item-label">Fraud Events</div>
-      <div class="metric-value" style="color: var(--color-danger);">{{ metrics.fraud_events }}</div>
+    
+    <div class="card card-hover flex flex-col justify-between" style="border-bottom: 4px solid var(--color-danger);">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Fraud Events</div>
+      <div class="text-3xl font-extrabold text-danger tabular-nums">{{ metrics.fraud_events }}</div>
     </div>
   </div>
 
-  <!-- Pending Moderation Submissions Queue -->
-  <div style="margin-bottom: 3.5rem;">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">Pending Submissions Queue</h2>
-      <a href="/admin/moderation" class="btn btn-secondary btn-sm">View Full Queue &rarr;</a>
-    </div>
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Pending Moderation Submissions Queue -->
+    <div class="flex-1">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-brand">Action Required: Queue</h2>
+        <a href="/admin/moderation" class="btn btn-outline btn-sm">View All &rarr;</a>
+      </div>
 
-    {% if pending_items %}
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Type</th>
-              <th>Location</th>
-              <th>Submitter</th>
-              <th>Date</th>
-              <th>Quick Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for res in pending_items %}
+      {% if pending_items %}
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
               <tr>
-                <td style="font-weight: 600;">
-                  <a href="/resources/{{ res.slug }}" target="_blank">{{ res.title }} ↗</a>
-                </td>
-                <td>{{ res.category.name if res.category else 'N/A' }}</td>
-                <td>{{ res.resource_type }}</td>
-                <td>📍 {{ res.location }}</td>
-                <td>{{ res.submitter.full_name if res.submitter else 'Guest' }}</td>
-                <td>{{ res.created_at.strftime('%b %d, %Y') }}</td>
-                <td>
-                  <div style="display: flex; gap: 0.4rem;">
-                    <form action="/admin/resources/{{ res.id }}/status" method="POST">
-                      <input type="hidden" name="status" value="published">
-                      <button type="submit" class="btn btn-sm" style="background: var(--color-accent-emerald); color: white;">Approve</button>
-                    </form>
-                    <form action="/admin/resources/{{ res.id }}/status" method="POST">
-                      <input type="hidden" name="status" value="rejected">
-                      <button type="submit" class="btn btn-sm btn-danger">Reject</button>
-                    </form>
-                  </div>
-                </td>
+                <th>Resource Title</th>
+                <th>Submitter</th>
+                <th>Date</th>
+                <th>Action</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for res in pending_items[:5] %}
+                <tr class="transition-base hover:bg-surface-hover">
+                  <td class="font-semibold text-brand text-sm">
+                    <a href="/resources/{{ res.slug }}" target="_blank" class="hover:text-primary transition-base">{{ res.title }} ↗</a>
+                    <div class="text-xs text-muted font-normal mt-1">{{ res.category.name if res.category else 'N/A' }}</div>
+                  </td>
+                  <td class="text-sm text-secondary">{{ res.submitter.full_name if res.submitter else 'Guest' }}</td>
+                  <td class="tabular-nums text-sm text-muted">{{ res.created_at.strftime('%b %d') }}</td>
+                  <td>
+                    <div class="flex gap-2">
+                      <form action="/admin/resources/{{ res.id }}/status" method="POST" class="m-0">
+                        <input type="hidden" name="status" value="published">
+                        <button type="submit" class="btn btn-sm btn-emerald" title="Approve">✓</button>
+                      </form>
+                      <form action="/admin/resources/{{ res.id }}/status" method="POST" class="m-0">
+                        <input type="hidden" name="status" value="rejected">
+                        <button type="submit" class="btn btn-sm btn-danger" title="Reject">×</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state" style="padding: 3rem 1.5rem;">
+          <div class="empty-state-icon">✨</div>
+          <h3 class="empty-state-title">Inbox Zero</h3>
+          <p class="empty-state-desc">All caught up! No pending submissions.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Recent User Flag Reports -->
+    <div class="flex-1">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-bold text-brand">Flagged Reports</h2>
+        <a href="/admin/reports" class="btn btn-outline btn-sm">View All &rarr;</a>
       </div>
-    {% else %}
-      <div style="background: var(--color-surface); padding: 2.5rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-        <p style="color: var(--color-text-secondary);">✨ All caught up! There are no pending submissions awaiting review.</p>
-      </div>
-    {% endif %}
+      
+      {% if recent_reports %}
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Resource</th>
+                <th>Reason</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for rep in recent_reports[:5] %}
+                <tr class="transition-base hover:bg-surface-hover">
+                  <td class="font-semibold text-brand text-sm">
+                    {% if rep.resource %}
+                      <a href="/resources/{{ rep.resource.slug }}" target="_blank" class="hover:text-primary transition-base">{{ rep.resource.title }} ↗</a>
+                    {% else %}
+                      Deleted Resource
+                    {% endif %}
+                  </td>
+                  <td><span class="badge badge-pending">{{ rep.reason }}</span></td>
+                  <td>
+                    <form action="/admin/reports/{{ rep.id }}/status" method="POST" class="m-0">
+                      <input type="hidden" name="status" value="reviewed">
+                      <button type="submit" class="btn btn-sm btn-secondary">Review</button>
+                    </form>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state" style="padding: 3rem 1.5rem;">
+          <div class="empty-state-icon">🛡️</div>
+          <h3 class="empty-state-title">No Flags</h3>
+          <p class="empty-state-desc">The community is quiet. No active reports.</p>
+        </div>
+      {% endif %}
+    </div>
   </div>
 
-  <!-- Recent User Flag Reports -->
-  <div>
-    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Flagged Resource Reports</h2>
-    {% if recent_reports %}
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Resource</th>
-              <th>Reason</th>
-              <th>Details</th>
-              <th>Reported Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for rep in recent_reports %}
-              <tr>
-                <td style="font-weight: 600;">
-                  {% if rep.resource %}
-                    <a href="/resources/{{ rep.resource.slug }}" target="_blank">{{ rep.resource.title }} ↗</a>
-                  {% else %}
-                    Deleted Resource
-                  {% endif %}
-                </td>
-                <td><span class="badge badge-pending">{{ rep.reason }}</span></td>
-                <td>{{ rep.details or 'No additional details provided' }}</td>
-                <td>{{ rep.created_at.strftime('%b %d, %Y') }}</td>
-                <td>
-                  <form action="/admin/reports/{{ rep.id }}/status" method="POST">
-                    <input type="hidden" name="status" value="reviewed">
-                    <button type="submit" class="btn btn-sm btn-secondary">Mark Reviewed</button>
-                  </form>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div style="background: var(--color-surface); padding: 2rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-        <p style="color: var(--color-text-secondary);">No active reports submitted by users.</p>
-      </div>
-    {% endif %}
-  </div>
 </div>
 {% endblock %}

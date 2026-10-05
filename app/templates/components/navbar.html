@@ -1,41 +1,43 @@
 <header class="site-header">
-  <div class="container nav-wrapper">
-    <a href="/" class="brand-logo">
-      <div class="brand-icon">H</div>
-      <span>HelpLink</span>
+  <div class="container nav-wrapper h-full">
+    <a href="/" class="brand-logo group">
+      <div class="brand-icon group-hover:scale-105 transition-transform duration-300">H</div>
+      <span class="tracking-tight text-xl">HelpLink</span>
       {% if current_user and settings and settings.AUTH_BYPASS_ENABLED and settings.ENV == 'development' %}
-        <span style="background: #FEF3C7; color: #92400E; font-size: 0.70rem; font-weight: 700; padding: 2px 8px; border-radius: 9999px; border: 1px solid #FCD34D; margin-left: 6px;">⚡ DEV AUTH MODE</span>
+        <span class="ml-2 px-2 py-0.5 text-[0.65rem] font-bold bg-warning-soft text-warning-hover border border-warning-border rounded-full flex items-center">⚡ DEV</span>
       {% endif %}
     </a>
 
-    <nav aria-label="Main Navigation">
-      <ul class="nav-links">
-        <li><a href="/resources" class="nav-link">Browse</a></li>
+    <nav aria-label="Main Navigation" class="h-full hidden md:flex items-center">
+      <ul class="nav-links flex h-full items-center gap-6">
+        <li class="h-full flex items-center"><a href="/resources" class="nav-link {% if request.url.path == '/resources' %}active font-semibold text-primary{% endif %}">Browse</a></li>
         {% if current_user %}
-        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
-        <li><a href="/saved" class="nav-link">Saved</a></li>
-        <li><a href="/rewards" class="nav-link">Rewards</a></li>
-        <li><a href="/profile/{{ current_user.contributor_id }}" class="nav-link">Profile</a></li>
+        <li class="h-full flex items-center"><a href="/dashboard" class="nav-link {% if request.url.path == '/dashboard' %}active font-semibold text-primary{% endif %}">Dashboard</a></li>
+        <li class="h-full flex items-center"><a href="/saved" class="nav-link {% if request.url.path == '/saved' %}active font-semibold text-primary{% endif %}">Saved</a></li>
+        <li class="h-full flex items-center"><a href="/rewards" class="nav-link {% if request.url.path == '/rewards' %}active font-semibold text-primary{% endif %}">Rewards</a></li>
+        <li class="h-full flex items-center"><a href="/profile/{{ current_user.contributor_id }}" class="nav-link {% if '/profile/' in request.url.path %}active font-semibold text-primary{% endif %}">Profile</a></li>
         {% endif %}
         {% if current_user and current_user.role == 'admin' %}
-        <li style="margin-left: 1rem;"><a href="/admin/dashboard" class="nav-link" style="color: var(--color-brand); font-weight: 700;">Admin</a></li>
+        <li class="h-full flex items-center ml-4 pl-4 border-l border-border"><a href="/admin/dashboard" class="nav-link font-bold text-brand hover:text-primary transition-colors">Admin</a></li>
         {% endif %}
       </ul>
     </nav>
 
-    <div class="nav-actions">
+    <div class="nav-actions hidden md:flex">
       {% if current_user %}
-        <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
-        <a href="/logout" class="nav-link" style="font-size: 0.88rem; color: var(--color-danger);">Sign Out</a>
+        <a href="/submit" class="btn btn-primary btn-sm shadow-sm hover:shadow">+ Submit Resource</a>
+        <a href="/logout" class="text-sm font-semibold text-danger hover:text-danger-hover transition-colors ml-2">Sign Out</a>
       {% else %}
-        <a href="/login" class="nav-link">Sign In</a>
-        <a href="/register" class="btn btn-primary btn-sm">Join HelpLink</a>
+        <a href="/login" class="text-sm font-medium text-secondary hover:text-brand transition-colors mr-2">Sign In</a>
+        <a href="/register" class="btn btn-primary btn-sm shadow-sm hover:shadow">Join HelpLink</a>
       {% endif %}
     </div>
 
     <!-- Mobile Hamburger Toggle Button -->
-    <button type="button" id="mobile-nav-toggle" class="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-      ☰
+    <button type="button" id="mobile-nav-toggle" class="mobile-nav-toggle md:hidden flex items-center justify-center w-10 h-10 rounded-md bg-surface border border-border text-brand hover:bg-bg-subtle transition-colors" aria-label="Toggle navigation menu" aria-expanded="false">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+      </svg>
     </button>
   </div>
 </header>
@@ -43,24 +45,24 @@
 <!-- Mobile Navigation Drawer -->
 <div id="mobile-nav-drawer" class="mobile-nav-drawer">
   <ul class="mobile-nav-links">
-    <li><a href="/resources">Browse Resources</a></li>
+    <li><a href="/resources" class="block py-2 text-brand font-semibold border-b border-border">Browse Resources</a></li>
     {% if current_user %}
-    <li><a href="/dashboard">Dashboard</a></li>
-    <li><a href="/saved">Saved Resources</a></li>
-    <li><a href="/rewards">Rewards Store</a></li>
-    <li><a href="/profile/{{ current_user.contributor_id }}">My Profile</a></li>
+    <li><a href="/dashboard" class="block py-2 text-brand font-semibold border-b border-border">Dashboard</a></li>
+    <li><a href="/saved" class="block py-2 text-brand font-semibold border-b border-border">Saved Resources</a></li>
+    <li><a href="/rewards" class="block py-2 text-brand font-semibold border-b border-border">Rewards Store</a></li>
+    <li><a href="/profile/{{ current_user.contributor_id }}" class="block py-2 text-brand font-semibold border-b border-border">My Profile</a></li>
     {% if current_user.role == 'admin' %}
-    <li><a href="/admin/dashboard" style="color: var(--color-brand); font-weight: 700;">Admin Area</a></li>
+    <li><a href="/admin/dashboard" class="block py-2 text-brand font-bold bg-bg-subtle px-3 rounded-md mt-2">Admin Area</a></li>
     {% endif %}
     {% endif %}
   </ul>
-  <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+  <div class="flex flex-col gap-3 mt-4">
     {% if current_user %}
-      <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
-      <a href="/logout" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-danger-border);">Sign Out</a>
+      <a href="/submit" class="btn btn-primary w-full justify-center shadow-sm">+ Submit Resource</a>
+      <a href="/logout" class="btn btn-outline border-danger-border text-danger w-full justify-center">Sign Out</a>
     {% else %}
-      <a href="/login" class="btn btn-secondary btn-sm">Sign In</a>
-      <a href="/register" class="btn btn-primary btn-sm">Join HelpLink</a>
+      <a href="/login" class="btn btn-secondary w-full justify-center">Sign In</a>
+      <a href="/register" class="btn btn-primary w-full justify-center shadow-sm">Join HelpLink</a>
     {% endif %}
   </div>
 </div>

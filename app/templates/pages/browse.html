@@ -3,24 +3,28 @@
 {% block title %}Browse Resources — HelpLink{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
-  <div style="display: grid; grid-template-columns: 280px 1fr; gap: 2rem;">
+<div class="container py-10 md:py-16">
+  <div class="flex flex-col lg:flex-row gap-8">
+    
     <!-- Filter Sidebar -->
-    <aside>
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; position: sticky; top: 90px;">
-        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1.25rem;">Filter Resources</h3>
+    <aside class="w-full lg:w-72 flex-shrink-0">
+      <div class="card sticky top-24">
+        <div class="flex items-center gap-2 mb-6 text-brand">
+          <span class="text-xl">⚙️</span>
+          <h3 class="text-lg font-bold">Filter Resources</h3>
+        </div>
 
-        <form action="/resources" method="GET">
+        <form action="/resources" method="GET" class="flex flex-col gap-5">
           <!-- Search Input -->
-          <div class="form-group">
-            <label class="form-label">Keyword Search</label>
-            <input type="text" name="q" value="{{ q }}" class="form-input" placeholder="Search keywords...">
+          <div>
+            <label class="form-label mb-1.5 block">Keyword Search</label>
+            <input type="text" name="q" value="{{ q }}" class="form-input text-sm py-2" placeholder="Search keywords...">
           </div>
 
           <!-- Category Filter -->
-          <div class="form-group">
-            <label class="form-label">Category</label>
-            <select name="category" class="form-select">
+          <div>
+            <label class="form-label mb-1.5 block">Category</label>
+            <select name="category" class="form-select text-sm py-2">
               <option value="">All Categories</option>
               {% for cat in categories %}
                 <option value="{{ cat.slug }}" {% if selected_category == cat.slug %}selected{% endif %}>{{ cat.name }}</option>
@@ -29,9 +33,9 @@
           </div>
 
           <!-- Resource Type Filter -->
-          <div class="form-group">
-            <label class="form-label">Resource Type</label>
-            <select name="type" class="form-select">
+          <div>
+            <label class="form-label mb-1.5 block">Resource Type</label>
+            <select name="type" class="form-select text-sm py-2">
               <option value="">All Types</option>
               {% for rtype in resource_types %}
                 <option value="{{ rtype }}" {% if selected_type == rtype %}selected{% endif %}>{{ rtype }}</option>
@@ -40,70 +44,74 @@
           </div>
 
           <!-- Location Filter -->
-          <div class="form-group">
-            <label class="form-label">Location</label>
-            <input type="text" name="location" value="{{ selected_location }}" class="form-input" placeholder="e.g. Kozhikode, Kerala, Remote">
+          <div>
+            <label class="form-label mb-1.5 block">Location</label>
+            <input type="text" name="location" value="{{ selected_location }}" class="form-input text-sm py-2" placeholder="e.g. Kerala, Remote">
           </div>
 
-          <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
-            <button type="submit" class="btn btn-primary" style="flex: 1;">Apply Filters</button>
-            <a href="/resources" class="btn btn-secondary">Reset</a>
+          <div class="flex gap-2 mt-2">
+            <button type="submit" class="btn btn-primary flex-1">Apply</button>
+            <a href="/resources" class="btn btn-secondary px-3" title="Reset Filters">↻</a>
           </div>
         </form>
       </div>
     </aside>
 
     <!-- Main Results Area -->
-    <div>
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
+    <div class="flex-1 min-w-0">
+      <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <div>
-          <h1 style="font-size: 1.75rem; font-weight: 800; color: var(--color-brand);">
+          <h1 class="text-2xl font-extrabold text-brand mb-1">
             {% if selected_cat_obj %}{{ selected_cat_obj.name }}{% elif q %}Search results for "{{ q }}"{% else %}All Public Resources{% endif %}
           </h1>
-          <p style="color: var(--color-text-secondary); font-size: 0.95rem;">
-            Showing {{ resources|length }} of {{ total_items }} available resources
+          <p class="text-secondary text-sm">
+            Showing <strong class="text-brand">{{ resources|length }}</strong> of {{ total_items }} available resources
           </p>
         </div>
 
         {% if q or selected_category or selected_type or selected_location %}
-          <div class="quick-pills" style="margin: 0;">
-            {% if q %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Query: "{{ q }}"</span>{% endif %}
-            {% if selected_category %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Category: {{ selected_category }}</span>{% endif %}
-            {% if selected_type %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Type: {{ selected_type }}</span>{% endif %}
-            {% if selected_location %}<span class="pill-tag" style="background: var(--color-primary-light); color: var(--color-primary);">Location: {{ selected_location }}</span>{% endif %}
+          <div class="flex flex-wrap gap-2">
+            {% if q %}<span class="px-2.5 py-1 text-xs font-semibold bg-primary-soft text-primary rounded-md border border-primary-border">Query: "{{ q }}"</span>{% endif %}
+            {% if selected_category %}<span class="px-2.5 py-1 text-xs font-semibold bg-primary-soft text-primary rounded-md border border-primary-border">Category: {{ selected_category }}</span>{% endif %}
+            {% if selected_type %}<span class="px-2.5 py-1 text-xs font-semibold bg-primary-soft text-primary rounded-md border border-primary-border">Type: {{ selected_type }}</span>{% endif %}
+            {% if selected_location %}<span class="px-2.5 py-1 text-xs font-semibold bg-primary-soft text-primary rounded-md border border-primary-border">Location: {{ selected_location }}</span>{% endif %}
           </div>
         {% endif %}
       </div>
 
       <!-- Resource Grid -->
-      <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
+      <div class="resources-grid mb-10">
         {% for res in resources %}
           {% include "components/resource_card.html" %}
         {% else %}
-          <div style="grid-column: 1 / -1; background: var(--color-surface); padding: 4rem 2rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-            <div style="font-size: 3rem; margin-bottom: 1rem;">🔎</div>
-            <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">No resources match your search</h3>
-            <p style="color: var(--color-text-secondary); max-width: 450px; margin: 0 auto 1.5rem;">
-              Try clearing filters or searching for alternative keywords like "scholarship", "course", or "internship".
-            </p>
-            <a href="/resources" class="btn btn-primary">Clear All Filters</a>
+          <div class="col-span-full">
+            <div class="empty-state py-20">
+              <div class="empty-state-icon text-5xl mb-6">🔎</div>
+              <h3 class="empty-state-title text-xl">No resources match your search</h3>
+              <p class="empty-state-desc mt-2">Try clearing filters or searching for alternative keywords like "scholarship", "course", or "internship".</p>
+              <a href="/resources" class="btn btn-primary mt-4">Clear All Filters</a>
+            </div>
           </div>
         {% endfor %}
       </div>
 
       <!-- Pagination -->
       {% if total_pages > 1 %}
-        <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-top: 3rem;">
+        <div class="flex items-center justify-center gap-2 mt-12 pt-6 border-t border-border">
           {% if page > 1 %}
             <a href="/resources?q={{ q }}&category={{ selected_category }}&type={{ selected_type }}&location={{ selected_location }}&page={{ page - 1 }}" class="btn btn-secondary btn-sm">&larr; Previous</a>
+          {% else %}
+            <button class="btn btn-secondary btn-sm opacity-50 cursor-not-allowed" disabled>&larr; Previous</button>
           {% endif %}
 
-          <span style="font-size: 0.9rem; font-weight: 600; color: var(--color-text-secondary); padding: 0 0.5rem;">
+          <span class="text-sm font-semibold text-secondary px-3 tabular-nums">
             Page {{ page }} of {{ total_pages }}
           </span>
 
           {% if page < total_pages %}
             <a href="/resources?q={{ q }}&category={{ selected_category }}&type={{ selected_type }}&location={{ selected_location }}&page={{ page + 1 }}" class="btn btn-secondary btn-sm">Next &rarr;</a>
+          {% else %}
+            <button class="btn btn-secondary btn-sm opacity-50 cursor-not-allowed" disabled>Next &rarr;</button>
           {% endif %}
         </div>
       {% endif %}

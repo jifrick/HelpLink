@@ -3,10 +3,10 @@
 {% block title %}Contributor Command Center — HelpLink{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+<div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
 
   {% if submitted %}
-    <div class="alert {% if submitted_status == 'rejected' %}alert-error{% elif submitted_status == 'pending' %}alert-warning{% else %}alert-success{% endif %} alert-dismissible" style="margin-bottom: 2rem;">
+    <div class="alert {% if submitted_status == 'rejected' %}alert-error{% elif submitted_status == 'pending' %}alert-warning{% else %}alert-success{% endif %} transition-base" style="margin-bottom: 2rem;">
       {% if submitted_status == 'pending' %}
         ⏳ <strong>In Review:</strong> Your resource needs a quick additional review before it can be published.
       {% elif submitted_status == 'rejected' %}
@@ -17,101 +17,108 @@
     </div>
   {% endif %}
 
-  <!-- Hero Section -->
-  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
-    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 2rem;">
-      <div style="flex: 1 1 300px;">
-        <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;">
-          Welcome back, {{ current_user.full_name }}
+  <!-- Hero / Welcome Section -->
+  <div class="card mb-6" style="padding: 2.5rem;">
+    <div class="flex flex-col gap-6" style="flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: stretch;">
+      
+      <!-- User Info -->
+      <div class="flex flex-col justify-center gap-4" style="flex: 1 1 350px;">
+        <h1 class="text-2xl font-extrabold text-brand flex items-center gap-3">
+          Welcome back, {{ current_user.full_name }} 👋
           {% if current_user.trust_score > 70 %}
-          <span style="font-size: 0.9rem; background: var(--color-success); color: white; padding: 0.1rem 0.5rem; border-radius: var(--radius-full); font-weight: 600;" title="Trusted Contributor">✓ Trusted</span>
+          <span class="badge badge-published" title="Trusted Contributor">✓ Trusted</span>
           {% endif %}
         </h1>
         
-        <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
-          <span style="background: var(--color-background); border: 1px solid var(--color-border); padding: 0.25rem 0.75rem; border-radius: var(--radius-md); font-family: monospace; font-weight: 600; color: var(--color-text-secondary); font-size: 0.9rem;">ID: {{ current_user.contributor_id }}</span>
-          <span class="badge badge-published" style="font-size: 0.9rem;">{{ current_user.level }}</span>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="badge" style="background: var(--color-bg-subtle); border: 1px solid var(--color-border); font-family: var(--font-mono); color: var(--color-text-secondary);">ID: {{ current_user.contributor_id }}</span>
           {% if current_user.account_status != 'ACTIVE' %}
-            <span class="badge badge-rejected" style="font-size: 0.9rem;">{{ current_user.account_status }}</span>
+            <span class="badge badge-rejected">{{ current_user.account_status }}</span>
           {% endif %}
         </div>
         
-        <div style="display: flex; gap: 2rem; color: var(--color-text-secondary);">
+        <div class="flex items-center gap-6 mt-2 flex-wrap">
           <div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text);">{{ submissions|length }}</div>
-            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Contributions</div>
+            <div class="text-2xl font-extrabold tabular-nums">{{ submissions|length }}</div>
+            <div class="text-xs font-semibold text-muted uppercase tracking-wider mt-1">Contributions</div>
           </div>
           <div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary);">{{ current_user.helppoints_balance }}</div>
-            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">HelpPoints</div>
+            <div class="text-2xl font-extrabold tabular-nums text-primary">{{ current_user.helppoints_balance }}</div>
+            <div class="text-xs font-semibold text-muted uppercase tracking-wider mt-1">HelpPoints</div>
           </div>
           <div>
-            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-warning);">{{ user_badges|length }}</div>
-            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Badges</div>
+            <div class="text-2xl font-extrabold tabular-nums text-warning">{{ user_badges|length }}</div>
+            <div class="text-xs font-semibold text-muted uppercase tracking-wider mt-1">Badges</div>
           </div>
         </div>
       </div>
       
-      <div style="flex: 0 1 400px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
-        <h3 style="font-weight: 700; margin-bottom: 0.75rem; font-size: 1.1rem; color: var(--color-brand); text-transform: uppercase;">Level Progress</h3>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.95rem;">
-          <span style="color: var(--color-text);">{{ current_user.level }}</span>
+      <!-- Level Progress Component -->
+      <div class="level-progress-container" style="flex: 1 1 400px;">
+        <div class="level-progress-header">
+          <div>
+            <div class="text-xs font-semibold text-primary-light uppercase tracking-wider mb-1">Current Level</div>
+            <div class="text-xl font-bold">{{ current_user.level }}</div>
+          </div>
+          <div class="text-right">
+            {% if not level_info.is_max %}
+              <div class="text-2xl font-extrabold tabular-nums">{{ level_info.progress_percent }}%</div>
+            {% else %}
+              <div class="text-xl font-extrabold tabular-nums text-success">MAX</div>
+            {% endif %}
+          </div>
+        </div>
+        
+        <div class="level-progress-bar-bg mb-4">
+          <div class="level-progress-bar-fill" style="width: {{ level_info.progress_percent }}%;"></div>
+        </div>
+        
+        <div class="text-sm" style="color: rgba(255,255,255,0.8);">
           {% if not level_info.is_max %}
-          <span style="color: var(--color-text-secondary);">{{ current_user.helppoints_balance }} / {{ level_info.next_threshold }} HP</span>
+            <span class="font-bold text-white tabular-nums">{{ level_info.points_needed }}</span> HelpPoints needed to reach <strong>{{ level_info.next_level_name }}</strong>
           {% else %}
-          <span style="color: var(--color-primary);">MAX LEVEL REACHED</span>
+            You have reached the highest contributor level. Thank you!
           {% endif %}
         </div>
-        
-        <div style="height: 12px; background: var(--color-border); border-radius: var(--radius-full); overflow: hidden; margin-bottom: 0.75rem;">
-          <div style="height: 100%; background: var(--color-primary); width: {{ level_info.progress_percent }}%; border-radius: var(--radius-full); transition: width 0.5s ease;"></div>
-        </div>
-        
-        {% if not level_info.is_max %}
-        <div style="font-size: 0.85rem; color: var(--color-text-secondary);">
-          <strong>{{ level_info.points_needed }} HelpPoints</strong> needed to reach <span style="font-weight: 600; color: var(--color-text);">{{ level_info.next_level_name }}</span>.
-        </div>
-        {% else %}
-        <div style="font-size: 0.85rem; color: var(--color-text-secondary);">
-          You have reached the highest contributor level. Thank you for your incredible support!
-        </div>
-        {% endif %}
       </div>
     </div>
   </div>
   
-  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: var(--space-6);">
     
-    <!-- Left Column: Activity & Badges -->
-    <div>
+    <!-- Left Column: Badges & Submissions -->
+    <div class="flex flex-col gap-6">
+      
       <!-- Badges -->
-      <div style="margin-bottom: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">Earned Badges</h2>
-          <a href="/profile/{{ current_user.contributor_id }}" class="btn btn-outline btn-sm">Public Profile &rarr;</a>
+      <div class="card card-hover transition-base">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-bold text-brand">Earned Badges</h2>
+          <a href="/profile/{{ current_user.contributor_id }}" class="text-sm font-semibold text-primary hover:text-primary-hover transition-base">Public Profile &rarr;</a>
         </div>
         
         {% if user_badges %}
-        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+        <div class="flex flex-wrap gap-4">
           {% for ub in user_badges %}
-          <div style="background: var(--color-background); border: 1px solid var(--color-border); padding: 1rem; border-radius: var(--radius-md); text-align: center; width: 120px;">
-            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">{{ ub.badge.icon }}</div>
-            <div style="font-size: 0.85rem; font-weight: 700; line-height: 1.2;">{{ ub.badge.name }}</div>
+          <div class="badge-card" style="width: calc(33.33% - 1rem); min-width: 130px;">
+            <div class="badge-icon">{{ ub.badge.icon }}</div>
+            <div class="text-sm font-bold text-brand leading-tight">{{ ub.badge.name }}</div>
           </div>
           {% endfor %}
         </div>
         {% else %}
-        <div style="text-align: center; padding: 2rem; background: var(--color-background); border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
-          <div style="font-size: 2.5rem; filter: grayscale(100%); opacity: 0.5; margin-bottom: 0.5rem;">🏆</div>
-          <p style="color: var(--color-text-secondary); font-size: 0.95rem;">Your contribution journey starts here. Earn badges by sharing useful resources.</p>
+        <div class="empty-state">
+          <div class="empty-state-icon">🏆</div>
+          <h3 class="empty-state-title">No Badges Yet</h3>
+          <p class="empty-state-desc">Your contribution journey starts here. Earn badges by sharing useful resources.</p>
+          <a href="/submit" class="btn btn-outline btn-sm">Share a Resource</a>
         </div>
         {% endif %}
       </div>
       
-      <!-- Submissions -->
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">Contribution History</h2>
+      <!-- Contribution History -->
+      <div class="card card-hover transition-base">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-lg font-bold text-brand">Contribution History</h2>
           <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
         </div>
         
@@ -128,83 +135,88 @@
             </thead>
             <tbody>
               {% for res in submissions %}
-                <tr>
-                  <td style="font-weight: 600;">
-                    <a href="/resources/{{ res.slug }}">{{ res.title }}</a>
+                <tr class="transition-base hover:bg-surface-hover">
+                  <td class="font-semibold">
+                    <a href="/resources/{{ res.slug }}" class="text-brand hover:text-primary transition-base">{{ res.title }}</a>
                   </td>
-                  <td>{{ res.category.name if res.category else 'Uncategorized' }}</td>
+                  <td class="text-secondary text-sm">{{ res.category.name if res.category else 'Uncategorized' }}</td>
                   <td>
                     <span class="badge badge-{{ 'published' if res.status == 'published' else 'rejected' if res.status == 'rejected' else 'pending' }}">{{ res.status|capitalize }}</span>
                   </td>
-                  <td>{{ res.created_at.strftime('%b %d, %Y') }}</td>
+                  <td class="text-muted tabular-nums text-sm">{{ res.created_at.strftime('%b %d, %Y') }}</td>
                 </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
         {% else %}
-        <div style="background: var(--color-background); padding: 3rem; text-align: center; border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
-          <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">Help someone discover something useful.</p>
-          <a href="/submit" class="btn btn-primary btn-sm">Share your first resource</a>
+        <div class="empty-state">
+          <div class="empty-state-icon">📝</div>
+          <h3 class="empty-state-title">No Contributions</h3>
+          <p class="empty-state-desc">Help someone discover something useful today.</p>
+          <a href="/submit" class="btn btn-primary">Share your first resource</a>
         </div>
         {% endif %}
       </div>
     </div>
     
     <!-- Right Column: Points & Saved -->
-    <div>
+    <div class="flex flex-col gap-6">
+      
       <!-- HelpPoints Card -->
-      <div style="margin-bottom: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">HelpPoints</h2>
+      <div class="card card-hover transition-base">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-brand flex items-center gap-2">
+            <span class="text-primary">✨</span> HelpPoints
+          </h2>
           <a href="/rewards" class="btn btn-secondary btn-sm">Rewards &rarr;</a>
         </div>
         
-        <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">HelpPoints recognize useful contributions to the HelpLink community.</p>
+        <p class="text-sm text-secondary mb-6 line-height-relaxed">HelpPoints recognize your useful contributions to the community.</p>
         
-        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--color-border);">Recent Activity</h3>
+        <h3 class="text-sm font-bold text-brand mb-4 pb-2 border-b border-border uppercase tracking-wider">Recent Activity</h3>
         
         {% if recent_points %}
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+        <ul class="flex flex-col gap-4 list-none p-0 m-0">
           {% for tx in recent_points %}
-          <li style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-border);">
+          <li class="flex items-center justify-between pb-3 border-b border-border last:border-0 last:pb-0">
             <div>
-              <div style="font-weight: 600; font-size: 0.95rem; color: var(--color-text);">{{ tx.description or tx.transaction_type }}</div>
-              <div style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ tx.created_at.strftime('%b %d, %I:%M %p') }}</div>
+              <div class="font-semibold text-sm text-brand">{{ tx.description or tx.transaction_type }}</div>
+              <div class="text-xs text-muted tabular-nums mt-1">{{ tx.created_at.strftime('%b %d, %I:%M %p') }}</div>
             </div>
-            <div style="font-weight: 700; font-size: 1.1rem; {% if tx.amount > 0 %}color: var(--color-success);{% elif tx.amount < 0 %}color: var(--color-danger);{% else %}color: var(--color-text-secondary);{% endif %}">
+            <div class="font-bold text-lg tabular-nums {% if tx.amount > 0 %}text-success{% elif tx.amount < 0 %}text-danger{% else %}text-secondary{% endif %}">
               {% if tx.amount > 0 %}+{% endif %}{{ tx.amount }}
             </div>
           </li>
           {% endfor %}
         </ul>
         {% else %}
-        <div style="text-align: center; padding: 2rem 0; color: var(--color-text-secondary); font-size: 0.95rem;">
+        <div class="text-center py-6 text-sm text-muted">
           No point history yet.
         </div>
         {% endif %}
       </div>
       
       <!-- Saved Resources -->
-      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand);">Saved Bookmarks</h2>
-          <a href="/saved" style="font-size: 0.9rem; font-weight: 600; color: var(--color-primary);">View All</a>
+      <div class="card card-hover transition-base">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-brand">Saved Bookmarks</h2>
+          <a href="/saved" class="text-sm font-semibold text-primary hover:text-primary-hover transition-base">View All</a>
         </div>
         
         {% if saved_items %}
-        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+        <ul class="flex flex-col gap-3 list-none p-0 m-0">
           {% for res in saved_items[:3] %}
           <li>
-            <a href="/resources/{{ res.slug }}" style="display: block; font-weight: 600; font-size: 0.95rem; color: var(--color-text); text-decoration: none; padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid transparent; transition: all 0.2s ease;" onmouseover="this.style.background='var(--color-background)'; this.style.borderColor='var(--color-border)';" onmouseout="this.style.background='transparent'; this.style.borderColor='transparent';">
-              {{ res.title }}
-              <div style="font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 400; margin-top: 0.25rem;">{{ res.category.name if res.category else 'Uncategorized' }}</div>
+            <a href="/resources/{{ res.slug }}" class="block p-3 rounded-md border border-transparent hover:border-border hover:bg-bg-subtle transition-base">
+              <div class="font-semibold text-sm text-brand leading-tight mb-1">{{ res.title }}</div>
+              <div class="text-xs text-muted">{{ res.category.name if res.category else 'Uncategorized' }}</div>
             </a>
           </li>
           {% endfor %}
         </ul>
         {% else %}
-        <div style="text-align: center; padding: 1.5rem 0; color: var(--color-text-secondary); font-size: 0.9rem;">
+        <div class="text-center py-6 text-sm text-muted border border-dashed border-border rounded-md mt-2">
           No saved resources yet.
         </div>
         {% endif %}

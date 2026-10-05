@@ -3,33 +3,44 @@
 {% block title %}Submit a Useful Resource — HelpLink{% endblock %}
 
 {% block content %}
-<div class="container" style="padding: 3rem 1.5rem;">
-  <div class="form-card" style="max-width: 760px;">
-    <h1 class="form-card-title">Submit a Resource</h1>
-    <p class="form-card-subtitle">
-      Share an educational opportunity, scholarship, internship, free developer tool, or community service with the public.
-    </p>
+<div class="container py-12 md:py-20 flex justify-center">
+  <div class="card w-full max-w-3xl border-t-4" style="border-top-color: var(--color-primary);">
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-light text-primary text-3xl mb-4">
+        📝
+      </div>
+      <h1 class="text-3xl font-extrabold text-brand mb-2">Share a Resource</h1>
+      <p class="text-secondary">
+        Share an educational opportunity, scholarship, internship, free developer tool, or community service with the public.
+      </p>
+    </div>
 
-    <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 2rem; border-left: 3px solid var(--color-primary); padding-left: 1rem;">
-      HelpLink is a community resource platform. Please submit only genuine, useful and verifiable resources. Fake, misleading, duplicate or malicious submissions may result in loss of HelpPoints, account restrictions or permanent suspension.
+    <div class="bg-surface-hover border border-border rounded-lg p-5 mb-8 flex gap-4">
+      <div class="text-2xl mt-0.5">🛡️</div>
+      <div>
+        <h4 class="font-bold text-brand mb-1">Community Guidelines</h4>
+        <p class="text-sm text-secondary leading-relaxed">
+          HelpLink is a community resource platform. Please submit only genuine, useful and verifiable resources. Fake, misleading, duplicate or malicious submissions may result in loss of HelpPoints, account restrictions or permanent suspension.
+        </p>
+      </div>
     </div>
 
     {% if error %}
-      <div class="alert alert-error">
+      <div class="alert alert-error transition-base mb-8">
         ⚠️ {{ error }}
       </div>
     {% endif %}
 
     <form action="/submit" method="POST">
-      <div class="form-group">
-        <label class="form-label">Resource Title *</label>
-        <input type="text" name="title" value="{{ form.title if form else '' }}" class="form-input" placeholder="e.g. National Merit Scholarship 2026" required autofocus>
+      <div class="form-group mb-6">
+        <label class="form-label block mb-2">Resource Title <span class="text-danger">*</span></label>
+        <input type="text" name="title" value="{{ form.title if form else '' }}" class="form-input text-lg py-3" placeholder="e.g. National Merit Scholarship 2026" required autofocus>
       </div>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Category *</label>
-          <select name="category_id" class="form-select" required>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="form-group mb-0">
+          <label class="form-label block mb-2">Category <span class="text-danger">*</span></label>
+          <select name="category_id" class="form-select py-3" required>
             <option value="">Select Category</option>
             {% for cat in categories %}
               <option value="{{ cat.id }}" {% if form and form.category_id == cat.id %}selected{% endif %}>{{ cat.name }}</option>
@@ -37,9 +48,9 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Resource Type *</label>
-          <select name="resource_type" class="form-select" required>
+        <div class="form-group mb-0">
+          <label class="form-label block mb-2">Resource Type <span class="text-danger">*</span></label>
+          <select name="resource_type" class="form-select py-3" required>
             <option value="">Select Resource Type</option>
             {% for rtype in resource_types %}
               <option value="{{ rtype }}" {% if form and form.resource_type == rtype %}selected{% endif %}>{{ rtype }}</option>
@@ -48,42 +59,44 @@
         </div>
       </div>
 
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Location *</label>
-          <input type="text" name="location" value="{{ form.location if form else 'Remote' }}" class="form-input" placeholder="e.g. Kozhikode, Kerala, Remote, or India" required>
-          <span class="form-hint">Specify city, state, country, or Remote</span>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div class="form-group mb-0">
+          <label class="form-label block mb-2">Location <span class="text-danger">*</span></label>
+          <input type="text" name="location" value="{{ form.location if form else 'Remote' }}" class="form-input py-3" placeholder="e.g. Kozhikode, Kerala, Remote" required>
+          <span class="form-hint mt-1 block text-xs">Specify city, state, country, or Remote</span>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">External Destination URL *</label>
-          <input type="url" name="url" value="{{ form.url if form else '' }}" class="form-input" placeholder="https://official-website.org" required>
-          <span class="form-hint">Must start with http:// or https://</span>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Detailed Description *</label>
-        <textarea name="description" class="form-textarea" rows="6" placeholder="Provide a thorough description of who this resource is for, eligibility criteria, application process, and deadlines..." required>{{ form.description if form else '' }}</textarea>
-        <span class="form-hint">Minimum 20 characters</span>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Contact Email / Phone (Optional)</label>
-          <input type="text" name="contact" value="{{ form.contact if form else '' }}" class="form-input" placeholder="e.g. info@scholarship.org">
-        </div>
-
-        <div class="form-group">
-          <label class="form-label">Tags (Optional)</label>
-          <input type="text" name="tags_raw" value="{{ form.tags_raw if form else '' }}" class="form-input" placeholder="e.g. python, scholarship, beginners">
-          <span class="form-hint">Comma separated keywords</span>
+        <div class="form-group mb-0">
+          <label class="form-label block mb-2">External Destination URL <span class="text-danger">*</span></label>
+          <input type="url" name="url" value="{{ form.url if form else '' }}" class="form-input py-3" placeholder="https://official-website.org" required>
+          <span class="form-hint mt-1 block text-xs">Must start with http:// or https://</span>
         </div>
       </div>
 
-      <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
-        <a href="/" class="btn btn-secondary">Cancel</a>
-        <button type="submit" class="btn btn-primary btn-lg">Submit Resource for Review &rarr;</button>
+      <div class="form-group mb-6">
+        <label class="form-label block mb-2">Detailed Description <span class="text-danger">*</span></label>
+        <textarea name="description" class="form-textarea py-3" rows="5" placeholder="Provide a thorough description of who this resource is for, eligibility criteria, application process, and deadlines..." required>{{ form.description if form else '' }}</textarea>
+        <span class="form-hint mt-1 block text-xs">Minimum 20 characters</span>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <div class="form-group mb-0">
+          <label class="form-label block mb-2">Contact Email / Phone <span class="font-normal text-muted">(Optional)</span></label>
+          <input type="text" name="contact" value="{{ form.contact if form else '' }}" class="form-input py-3" placeholder="e.g. info@scholarship.org">
+        </div>
+
+        <div class="form-group mb-0">
+          <label class="form-label block mb-2">Tags <span class="font-normal text-muted">(Optional)</span></label>
+          <input type="text" name="tags_raw" value="{{ form.tags_raw if form else '' }}" class="form-input py-3" placeholder="e.g. python, scholarship, beginners">
+          <span class="form-hint mt-1 block text-xs">Comma separated keywords</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-end gap-4 pt-6 border-t border-border">
+        <a href="/" class="btn btn-secondary px-6">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg">
+          Submit for Review &rarr;
+        </button>
       </div>
     </form>
   </div>
