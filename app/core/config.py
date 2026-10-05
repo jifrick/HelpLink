@@ -1,5 +1,6 @@
 import os
 import sys
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
@@ -21,12 +22,14 @@ class Settings(BaseSettings):
         extra="ignore"
     )
 
-settings = Settings()
+    @model_validator(mode="after")
+    def validate_production_hardening(self) -> "Settings":
+        if self.ENV == "production":
+            if self.SECRET_KEY == "helplink_dev_secret_key_change_in_prod_2026_987654321":
+                raise ValueError("CRITICAL: Production environment detected, but default SECRET_KEY is in use. Set a secure SECRET_KEY in environment variables.")
+            if self.AUTH_BYPASS_ENABLED:
+                raise ValueError("CRITICAL: Production environment detected, but AUTH_BYPASS_ENABLED is set to True. Authentication bypass MUST NOT be enabled in production environments.")
+        return self
 
-# Hardening for Production environments
-if settings.ENV == "production":
-    if settings.SECRET_KEY == "helplink_dev_secret_key_change_in_prod_2026_987654321":
-        raise ValueError("CRITICAL: Production environment detected, but default SECRET_KEY is in use. Set a secure SECRET_KEY in environment variables.")
-    if settings.AUTH_BYPASS_ENABLED:
-        raise ValueError("CRITICAL: Production environment detected, but AUTH_BYPASS_ENABLED is set to True. Authentication bypass MUST NOT be enabled in production environments.")
+settings = Settings()
 
