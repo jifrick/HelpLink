@@ -92,8 +92,14 @@ class Reward(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     cost_hp: Mapped[int] = mapped_column(nullable=False)
     reward_type: Mapped[str] = mapped_column(String(50), nullable=False) # DIGITAL_DOWNLOAD, PHYSICAL, BADGE, ROLE
+    status: Mapped[str] = mapped_column(String(50), default="DRAFT", nullable=False) # DRAFT, READY, UNAVAILABLE, COMING_SOON, ARCHIVED
+    asset_reference: Mapped[str] = mapped_column(String(255), nullable=True)
+    thumbnail: Mapped[str] = mapped_column(String(255), nullable=True)
+    inventory: Mapped[int] = mapped_column(nullable=True)
+    redemption_limit: Mapped[int] = mapped_column(default=1, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 
 class RewardRedemption(Base):
     __tablename__ = "reward_redemptions"

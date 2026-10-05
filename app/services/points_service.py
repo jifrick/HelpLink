@@ -103,7 +103,7 @@ def award_points(db: Session, user_id: int, amount: int, tx_type: str, ref_type:
     
     db.commit()
 
-def deduct_points(db: Session, user_id: int, amount: int, tx_type: str, ref_type: Optional[str] = None, ref_id: Optional[str] = None, description: Optional[str] = None, force: bool = False) -> bool:
+def deduct_points(db: Session, user_id: int, amount: int, tx_type: str, ref_type: Optional[str] = None, ref_id: Optional[str] = None, description: Optional[str] = None, force: bool = False, auto_commit: bool = True) -> bool:
     """Atomic deduction. Returns False if insufficient funds unless force=True."""
     if amount <= 0:
         return True
@@ -128,5 +128,6 @@ def deduct_points(db: Session, user_id: int, amount: int, tx_type: str, ref_type
     user.helppoints_balance -= amount
     recalculate_user_level(db, user)
     
-    db.commit()
+    if auto_commit:
+        db.commit()
     return True

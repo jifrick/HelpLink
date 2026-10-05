@@ -5,27 +5,15 @@
 {% block content %}
 <div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
 
-  {% if redeemed %}
-    <div class="alert alert-success transition-base mb-6">
-      <i data-lucide="party-popper" class="w-4 h-4 inline-block align-text-bottom mr-1 text-success"></i> <strong>Reward Claimed!</strong> You have successfully redeemed a reward. Check your redemptions below.
-    </div>
-  {% endif %}
-  
-  {% if error %}
-    <div class="alert alert-error transition-base mb-6">
-      <i data-lucide="alert-triangle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> <strong>Oops!</strong> {{ error }}
-    </div>
-  {% endif %}
-
   <div class="flex items-center justify-between mb-8 gap-4 flex-wrap">
     <div>
       <h1 class="text-2xl font-extrabold text-brand mb-2">Rewards Marketplace</h1>
-      <p class="text-secondary text-base">Use your HelpPoints for community rewards.</p>
+      <p class="text-secondary text-base">Use your HelpPoints to unlock exclusive community rewards.</p>
     </div>
     
     <div class="card flex flex-col justify-center items-center py-4 px-6 border-2 border-primary-light bg-surface-elevated">
       <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Your Balance</div>
-      <div class="text-2xl font-extrabold text-primary tabular-nums">{{ current_user.helppoints_balance }} <span class="text-base font-semibold">HP</span></div>
+      <div class="text-2xl font-extrabold text-primary tabular-nums"><span id="user-balance">{{ current_user.helppoints_balance }}</span> <span class="text-base font-semibold">HP</span></div>
     </div>
   </div>
 
@@ -35,21 +23,43 @@
     {% if rewards %}
       <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
         {% for reward in rewards %}
-          <div class="reward-card">
+          <div class="reward-card relative flex flex-col p-5 bg-surface border border-border rounded-xl shadow-sm transition-base hover:shadow-md">
+            
+            {% if reward.status == 'COMING_SOON' %}
+              <div class="absolute top-0 right-0 -mt-2 -mr-2 bg-warning text-bg text-xs font-bold px-2 py-1 rounded-md shadow-sm transform rotate-3">Coming Soon</div>
+            {% endif %}
+
             <div class="flex justify-between items-start w-full mb-4">
-              <h3 class="text-lg font-bold text-brand text-left m-0">{{ reward.name }}</h3>
-              <span class="badge badge-published" style="background: var(--color-primary-soft); color: var(--color-primary); font-size: 0.85rem; font-weight: 800; padding: 0.25rem 0.6rem;">{{ reward.cost_hp }} HP</span>
+              <h3 class="text-lg font-bold text-brand text-left m-0 pr-2">{{ reward.name }}</h3>
+              <span class="badge" style="background: var(--color-primary-soft); color: var(--color-primary); font-size: 0.85rem; font-weight: 800; padding: 0.25rem 0.6rem; white-space: nowrap;">{{ reward.cost_hp }} HP</span>
             </div>
             
             <p class="text-sm text-secondary text-left mb-6 w-full flex-grow">
               {{ reward.description }}
             </p>
             
-            <div class="w-full mt-auto">
-              {% if current_user.helppoints_balance >= reward.cost_hp %}
-                <button type="button" class="btn btn-primary w-full" onclick="openModal('{{ reward.id }}', '{{ reward.name | escape }}', '{{ reward.cost_hp }}')">Redeem Reward</button>
+            <div class="w-full mt-auto" id="reward-action-{{ reward.id }}">
+              {% if reward.id in owned_reward_ids %}
+                <div class="flex gap-2">
+                  <div class="flex-1 flex items-center justify-center bg-success-soft text-success border border-success-light rounded-md py-2 text-sm font-semibold">
+                    <i data-lucide="check-circle" class="w-4 h-4 mr-1.5"></i> Owned
+                  </div>
+                  {% if reward.reward_type == 'DIGITAL_DOWNLOAD' %}
+                    <a href="/rewards/{{ reward.id }}/download" class="btn btn-outline flex-1 justify-center text-sm" download>
+                      <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Download
+                    </a>
+                  {% endif %}
+                </div>
+              {% elif reward.status == 'READY' %}
+                {% if current_user.helppoints_balance >= reward.cost_hp %}
+                  <button type="button" class="btn btn-primary w-full" onclick="openModal('{{ reward.id }}', '{{ reward.name | escape }}', '{{ reward.cost_hp }}')">Redeem Reward</button>
+                {% else %}
+                  <button type="button" class="btn btn-secondary w-full" disabled>Need {{ reward.cost_hp - current_user.helppoints_balance }} more HP</button>
+                {% endif %}
               {% else %}
-                <button type="button" class="btn btn-secondary w-full" disabled>Need {{ reward.cost_hp - current_user.helppoints_balance }} more HP</button>
+                <button type="button" class="btn btn-secondary w-full" disabled>
+                  {% if reward.status == 'COMING_SOON' %}Coming Soon{% else %}Unavailable{% endif %}
+                </button>
               {% endif %}
             </div>
           </div>
@@ -57,7 +67,7 @@
       </div>
     {% else %}
       <div class="empty-state">
-        <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="gift" class="w-12 h-12"></i></div>
+        <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="package" class="w-12 h-12"></i></div>
         <h3 class="empty-state-title">No Rewards Available</h3>
         <p class="empty-state-desc">We're working on stocking the store. Check back soon!</p>
       </div>
@@ -66,119 +76,199 @@
 
   <div>
     <h2 class="text-lg font-bold text-brand mb-4">My Redemptions</h2>
-    {% if redemptions %}
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Reward</th>
-              <th>Date</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for r in redemptions %}
-              <tr class="transition-base hover:bg-surface-hover">
-                <td class="text-sm text-muted" style="font-family: var(--font-mono);">{{ r.redemption_id[:8] }}...</td>
-                <td class="font-semibold text-brand">{{ r.reward.name }}</td>
-                <td class="tabular-nums text-sm">{{ r.created_at.strftime('%b %d, %Y') }}</td>
-                <td>
-                  {% if r.status == 'FULFILLED' %}
-                    <span class="badge badge-published">Fulfilled</span>
-                  {% elif r.status == 'PENDING' %}
-                    <span class="badge badge-pending">Pending</span>
-                  {% else %}
-                    <span class="badge badge-rejected">{{ r.status|capitalize }}</span>
-                  {% endif %}
-                </td>
+    <div id="redemptions-container">
+      {% if redemptions %}
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Reward</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Action</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div class="empty-state">
-        <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="ticket" class="w-12 h-12"></i></div>
-        <h3 class="empty-state-title">No Redemptions Yet</h3>
-        <p class="empty-state-desc">Use your HelpPoints to unlock community rewards.</p>
-        <a href="#available" class="btn btn-primary btn-sm">Explore Rewards</a>
-      </div>
-    {% endif %}
+            </thead>
+            <tbody>
+              {% for r in redemptions %}
+                <tr class="transition-base hover:bg-surface-hover">
+                  <td class="text-sm text-muted" style="font-family: var(--font-mono);">{{ r.redemption_id[:8] }}...</td>
+                  <td class="font-semibold text-brand">{{ r.reward.name }}</td>
+                  <td class="tabular-nums text-sm">{{ r.created_at.strftime('%b %d, %Y') }}</td>
+                  <td>
+                    {% if r.status == 'FULFILLED' %}
+                      <span class="badge badge-published">Fulfilled</span>
+                    {% elif r.status == 'PENDING' %}
+                      <span class="badge badge-pending">Pending</span>
+                    {% else %}
+                      <span class="badge badge-rejected">{{ r.status|capitalize }}</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if r.status == 'FULFILLED' and r.reward.reward_type == 'DIGITAL_DOWNLOAD' %}
+                      <a href="/rewards/{{ r.reward.id }}/download" class="text-primary hover:text-primary-hover text-sm font-medium flex items-center" download>
+                        <i data-lucide="download" class="w-4 h-4 mr-1"></i> Download
+                      </a>
+                    {% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="empty-state" id="no-redemptions">
+          <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="ticket" class="w-12 h-12"></i></div>
+          <h3 class="empty-state-title">No Redemptions Yet</h3>
+          <p class="empty-state-desc">Use your HelpPoints to unlock community rewards.</p>
+        </div>
+      {% endif %}
+    </div>
   </div>
 
 </div>
 
 <!-- Premium Confirmation Modal -->
 <div id="redeemModal" class="modal-overlay">
-  <div class="modal-content">
-    <div class="flex items-center justify-center mb-4 text-4xl text-primary opacity-90">
-      <i data-lucide="gift" class="w-12 h-12"></i>
+  <div class="modal-content relative" id="modal-content-area">
+    <div id="modal-default-view">
+      <div class="flex items-center justify-center mb-4 text-4xl text-primary opacity-90">
+        <i data-lucide="package" class="w-12 h-12"></i>
+      </div>
+      
+      <h3 class="text-xl font-bold text-center text-brand mb-2">Confirm Redemption</h3>
+      <p class="text-center text-secondary mb-6">Are you sure you want to redeem "<strong id="modalRewardName" class="text-brand"></strong>"?</p>
+      
+      <div id="modal-error-container"></div>
+      
+      <div class="bg-bg p-4 rounded-md border border-border mb-6 flex flex-col gap-3 text-sm">
+        <div class="flex justify-between items-center">
+          <span class="text-secondary font-medium">Cost</span>
+          <strong id="modalCost" class="text-brand"></strong>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-secondary font-medium">Your balance</span>
+          <strong class="text-brand tabular-nums">{{ current_user.helppoints_balance }} HP</strong>
+        </div>
+        <div class="flex justify-between items-center pt-3 mt-1 border-t border-border">
+          <span class="text-secondary font-medium">Remaining balance</span>
+          <strong id="modalRemaining" class="text-primary tabular-nums"></strong>
+        </div>
+      </div>
+      
+      <div class="flex gap-3 mt-6">
+        <button id="modal-cancel-btn" onclick="closeModal()" class="btn btn-secondary w-full justify-center">Cancel</button>
+        <button id="modal-confirm-btn" class="btn btn-primary w-full justify-center">Confirm Redemption</button>
+      </div>
     </div>
     
-    <h3 class="text-xl font-bold text-center text-brand mb-2">Confirm Redemption</h3>
-    <p class="text-center text-secondary mb-6">Are you sure you want to redeem "<strong id="modalRewardName" class="text-brand"></strong>"?</p>
-    
-    <div class="bg-bg p-4 rounded-md border border-border mb-6 flex flex-col gap-3 text-sm">
-      <div class="flex justify-between items-center">
-        <span class="text-secondary font-medium">Cost</span>
-        <strong id="modalCost" class="text-brand"></strong>
+    <div id="modal-success-view" class="hidden text-center py-4">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-success-soft mb-4">
+        <i data-lucide="check-circle" class="w-8 h-8 text-success"></i>
       </div>
-      <div class="flex justify-between items-center">
-        <span class="text-secondary font-medium">Your balance</span>
-        <strong class="text-brand tabular-nums">{{ current_user.helppoints_balance }} HP</strong>
-      </div>
-      <div class="flex justify-between items-center pt-3 mt-1 border-t border-border">
-        <span class="text-secondary font-medium">Remaining balance</span>
-        <strong id="modalRemaining" class="text-primary tabular-nums"></strong>
-      </div>
-    </div>
-    
-    <div class="flex gap-3 mt-6">
-      <button onclick="closeModal()" class="btn btn-secondary w-full justify-center">Cancel</button>
-      <form id="modalForm" method="POST" class="w-full m-0">
-        <button type="submit" class="btn btn-primary w-full justify-center">Confirm Redemption</button>
-      </form>
+      <h3 class="text-2xl font-bold text-brand mb-2">Reward Unlocked!</h3>
+      <p class="text-secondary mb-6">Your redemption was successful and your reward is ready.</p>
+      <button onclick="window.location.reload()" class="btn btn-primary w-full justify-center">Close & Reload</button>
     </div>
   </div>
 </div>
 
 <script>
+  let activeRewardId = null;
+  let isRedeeming = false;
+
   function openModal(rewardId, rewardName, rewardCost) {
+    if (isRedeeming) return;
+    
+    activeRewardId = rewardId;
     const currentBalance = parseInt("{{ current_user.helppoints_balance }}", 10);
     const remaining = currentBalance - parseInt(rewardCost, 10);
     
     document.getElementById('modalRewardName').textContent = rewardName;
     document.getElementById('modalCost').textContent = rewardCost + " HP";
     document.getElementById('modalRemaining').textContent = remaining + " HP";
-    document.getElementById('modalForm').action = "/rewards/" + rewardId + "/redeem";
+    document.getElementById('modal-error-container').innerHTML = '';
     
     const overlay = document.getElementById('redeemModal');
     overlay.style.display = 'flex';
-    // small timeout to allow display:flex to apply before adding active class for animation
     setTimeout(() => {
       overlay.classList.add('active');
     }, 10);
   }
   
   function closeModal() {
+    if (isRedeeming) return;
     const overlay = document.getElementById('redeemModal');
     overlay.classList.remove('active');
     setTimeout(() => {
       overlay.style.display = 'none';
-    }, 200); // match transition duration
+      activeRewardId = null;
+    }, 200); 
   }
   
-  // Close modal on escape key or clicking outside
   document.addEventListener('keydown', function(event) {
-    if (event.key === "Escape") {
-      closeModal();
-    }
+    if (event.key === "Escape") closeModal();
   });
   
   document.getElementById('redeemModal').addEventListener('click', function(e) {
-    if(e.target === this) {
-      closeModal();
+    if(e.target === this) closeModal();
+  });
+
+  document.getElementById('modal-confirm-btn').addEventListener('click', async function() {
+    if (isRedeeming || !activeRewardId) return;
+    
+    isRedeeming = true;
+    const btn = this;
+    const cancelBtn = document.getElementById('modal-cancel-btn');
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin mr-2 inline"></i> Redeeming...';
+    cancelBtn.classList.add('pointer-events-none', 'opacity-50');
+    lucide.createIcons();
+    
+    document.getElementById('modal-error-container').innerHTML = '';
+
+    try {
+      const response = await fetch(`/rewards/${activeRewardId}/redeem`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        // Show success view
+        document.getElementById('modal-default-view').classList.add('hidden');
+        document.getElementById('modal-success-view').classList.remove('hidden');
+        lucide.createIcons();
+      } else {
+        // Show error
+        document.getElementById('modal-error-container').innerHTML = `
+          <div class="alert alert-error mb-4">
+            <i data-lucide="alert-triangle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> 
+            ${data.error || 'Something went wrong.'}
+          </div>
+        `;
+        lucide.createIcons();
+        resetBtn();
+      }
+    } catch (err) {
+      document.getElementById('modal-error-container').innerHTML = `
+        <div class="alert alert-error mb-4">
+          <i data-lucide="alert-triangle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> 
+          Network error. Please try again.
+        </div>
+      `;
+      lucide.createIcons();
+      resetBtn();
+    }
+    
+    function resetBtn() {
+      isRedeeming = false;
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+      cancelBtn.classList.remove('pointer-events-none', 'opacity-50');
     }
   });
 </script>

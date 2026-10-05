@@ -1,7 +1,8 @@
 import uuid
+import os
 from typing import Optional
-from fastapi import APIRouter, Request, Depends, Form, HTTPException, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Request, Depends, HTTPException, status
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.core.templates import templates
@@ -16,16 +17,16 @@ router = APIRouter()
 @router.get("/rewards", response_class=HTMLResponse)
 def rewards_store(
     request: Request,
-    redeemed: Optional[bool] = None,
-    error: Optional[str] = None,
     db: Session = Depends(get_db),
     current_user: User = Depends(require_current_user)
 ):
-    # Fetch active rewards
-    rewards = db.query(Reward).filter(Reward.is_active == True).order_by(Reward.cost_hp).all()
+    # Fetch active and visible rewards
+    rewards = db.query(Reward).filter(Reward.status.in_(["READY", "COMING_SOON", "UNAVAILABLE"]), Reward.is_active == True).order_by(Reward.cost_hp).all()
     # Fetch user redemptions
     redemptions = db.query(RewardRedemption).filter(RewardRedemption.user_id == current_user.id).order_by(RewardRedemption.created_at.desc()).all()
     
+    owned_reward_ids = [r.reward_id for r in redemptions]
+
     return templates.TemplateResponse(
         request=request,
         name="user/rewards.html",
@@ -33,8 +34,7 @@ def rewards_store(
             "current_user": current_user,
             "rewards": rewards,
             "redemptions": redemptions,
-            "redeemed": redeemed,
-            "error": error
+            "owned_reward_ids": owned_reward_ids
         }
     )
 
@@ -43,36 +43,74 @@ def redeem_reward(
     reward_id: int,
     request: Request,
     db: Session = Depends(get_db),
-    current_user: User = Depends(require_current_user),
-    _: None = Depends(validate_csrf_and_origin)
+    current_user: User = Depends(require_current_user)
 ):
-    reward = db.query(Reward).filter(Reward.id == reward_id, Reward.is_active == True).first()
+    reward = db.query(Reward).filter(Reward.id == reward_id, Reward.status == "READY", Reward.is_active == True).first()
     if not reward:
-        return RedirectResponse(url="/rewards?error=Reward not found or inactive", status_code=status.HTTP_303_SEE_OTHER)
+        return JSONResponse(status_code=400, content={"error": "Reward is not currently available for redemption."})
         
-    # Atomic point deduction
-    success = deduct_points(
-        db=db,
-        user_id=current_user.id,
-        amount=reward.cost_hp,
-        tx_type="REWARD_REDEMPTION",
-        ref_type="reward",
-        ref_id=str(reward.id), # Not quite right if they redeem multiple times, but ok for now
-        description=f"Redeemed reward: {reward.name}"
-    )
-    
-    if not success:
-        return RedirectResponse(url="/rewards?error=Insufficient HelpPoints", status_code=status.HTTP_303_SEE_OTHER)
+    # Check if already owned
+    existing_redemption = db.query(RewardRedemption).filter(RewardRedemption.user_id == current_user.id, RewardRedemption.reward_id == reward.id).first()
+    if existing_redemption:
+        return JSONResponse(status_code=400, content={"error": "You already own this reward."})
         
-    # Create redemption record
-    redemption_id = f"RWD-{uuid.uuid4().hex[:8].upper()}"
-    redemption = RewardRedemption(
-        user_id=current_user.id,
-        reward_id=reward.id,
-        status="FULFILLED" if reward.reward_type == "DIGITAL_DOWNLOAD" else "PENDING",
-        redemption_id=redemption_id
-    )
-    db.add(redemption)
-    db.commit()
+    try:
+        # Atomic point deduction (no auto commit)
+        success = deduct_points(
+            db=db,
+            user_id=current_user.id,
+            amount=reward.cost_hp,
+            tx_type="REWARD_REDEMPTION",
+            ref_type="reward",
+            ref_id=str(reward.id),
+            description=f"Redeemed reward: {reward.name}",
+            auto_commit=False
+        )
+        
+        if not success:
+            db.rollback()
+            return JSONResponse(status_code=400, content={"error": "Insufficient HelpPoints."})
+            
+        # Create redemption record
+        redemption_id = f"RWD-{uuid.uuid4().hex[:8].upper()}"
+        redemption = RewardRedemption(
+            user_id=current_user.id,
+            reward_id=reward.id,
+            status="FULFILLED" if reward.reward_type == "DIGITAL_DOWNLOAD" else "PENDING",
+            redemption_id=redemption_id
+        )
+        db.add(redemption)
+        db.commit()
+        
+        return JSONResponse(status_code=200, content={"success": True, "message": "Reward redeemed successfully!", "status": redemption.status, "redemption_id": redemption.redemption_id})
+    except Exception as e:
+        db.rollback()
+        return JSONResponse(status_code=500, content={"error": "An error occurred during fulfillment. Your points have not been deducted."})
+
+
+@router.get("/rewards/{reward_id}/download")
+def download_reward(
+    reward_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_current_user)
+):
+    # Verify ownership
+    redemption = db.query(RewardRedemption).filter(RewardRedemption.user_id == current_user.id, RewardRedemption.reward_id == reward_id, RewardRedemption.status == "FULFILLED").first()
+    if not redemption:
+        raise HTTPException(status_code=403, detail="You do not own this reward or it is not fulfilled.")
+        
+    reward = db.query(Reward).filter(Reward.id == reward_id).first()
+    if not reward or not reward.asset_reference:
+        raise HTTPException(status_code=404, detail="Reward asset not found.")
+        
+    file_path = os.path.join(os.getcwd(), reward.asset_reference)
     
-    return RedirectResponse(url="/rewards?redeemed=true", status_code=status.HTTP_303_SEE_OTHER)
+    # Path traversal protection
+    if not os.path.abspath(file_path).startswith(os.getcwd()):
+        raise HTTPException(status_code=400, detail="Invalid path")
+        
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="The reward file is currently unavailable.")
+        
+    filename = os.path.basename(file_path)
+    return FileResponse(path=file_path, filename=filename, media_type='application/octet-stream')
