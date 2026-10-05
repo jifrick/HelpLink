@@ -1,7 +1,7 @@
 <header class="site-header">
   <div class="container nav-wrapper h-full">
     <a href="/" class="brand-logo group">
-      <img src="/static/images/logo.png" alt="HelpLink Logo" class="h-8 w-auto group-hover:scale-105 transition-transform duration-200">
+      <img src="/static/images/logo.webp" alt="HelpLink Logo" class="h-8 w-auto group-hover:scale-105 transition-transform duration-200">
       {% if current_user and settings and settings.AUTH_BYPASS_ENABLED and settings.ENV == 'development' %}
         <span class="ml-2 px-2 py-0.5 text-[0.65rem] font-bold bg-warning-soft text-warning-hover border border-warning-border rounded-full flex items-center gap-1"><i data-lucide="zap" class="w-3 h-3"></i> DEV</span>
       {% endif %}
