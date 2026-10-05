@@ -92,13 +92,156 @@
         </div>
       </div>
 
-      <div class="flex items-center justify-end gap-4 pt-6 border-t border-border">
-        <a href="/" class="btn btn-secondary px-6">Cancel</a>
-        <button type="submit" class="btn btn-primary btn-lg">
+      <div class="flex items-center justify-end gap-4 pt-6 border-t border-border" id="submit-actions">
+        <a href="/" class="btn btn-secondary px-6" id="cancel-btn">Cancel</a>
+        <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
           Submit for Review &rarr;
         </button>
+      </div>
+      
+      <!-- Result State Container (Hidden by default) -->
+      <div id="result-state" class="hidden p-8 border rounded-xl text-center shadow-sm" aria-live="polite">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-surface shadow-sm mb-4">
+          <i id="result-icon" data-lucide="" class="w-8 h-8"></i>
+        </div>
+        <h3 id="result-title" class="text-2xl font-bold text-brand mb-2"></h3>
+        <p id="result-desc" class="text-secondary mb-6"></p>
+        <a href="/dashboard" class="btn btn-primary">Go to Dashboard</a>
       </div>
     </form>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.querySelector('form[action="/submit"]');
+  const submitBtn = document.getElementById('submit-btn');
+  const cancelBtn = document.getElementById('cancel-btn');
+  const actionsContainer = document.getElementById('submit-actions');
+  const resultState = document.getElementById('result-state');
+  const resultIcon = document.getElementById('result-icon');
+  const resultTitle = document.getElementById('result-title');
+  const resultDesc = document.getElementById('result-desc');
+  
+  // Create an error container above the form
+  const errorContainer = document.createElement('div');
+  form.parentNode.insertBefore(errorContainer, form);
+  
+  let isSubmitting = false;
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Prevent duplicate submissions
+    if (isSubmitting) return;
+
+    isSubmitting = true;
+    errorContainer.innerHTML = '';
+    
+    const originalBtnHTML = submitBtn.innerHTML;
+    
+    // Lock UI and show subtle loading state
+    submitBtn.disabled = true;
+    submitBtn.setAttribute('aria-disabled', 'true');
+    cancelBtn.classList.add('pointer-events-none', 'opacity-50');
+    submitBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin mr-2 inline"></i> Submitting...';
+    lucide.createIcons();
+
+    try {
+      const formData = new FormData(form);
+      const response = await fetch('/submit', {
+        method: 'POST',
+        body: formData,
+        redirect: 'follow'
+      });
+      
+      if (response.ok) {
+        // Successfully processed. Check URL to determine status.
+        const responseUrl = new URL(response.url);
+        if (responseUrl.pathname.includes('/dashboard') && responseUrl.searchParams.has('submitted')) {
+          const status = responseUrl.searchParams.get('status');
+          showResult(status);
+          return;
+        }
+      } else if (response.status === 400) {
+        // Backend validation failed, extract error from returned HTML
+        const text = await response.text();
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        const alertDiv = doc.querySelector('.alert-error');
+        
+        if (alertDiv) {
+          errorContainer.innerHTML = alertDiv.outerHTML;
+        } else {
+          showErrorAlert("Submission failed. Please check your inputs.");
+        }
+        resetButton(originalBtnHTML);
+        return;
+      }
+      
+      // If we reach here, response was not 200 or 400
+      throw new Error("Unexpected server response");
+      
+    } catch (err) {
+      showErrorAlert("Submission failed. We couldn't confirm your submission. Please try again.");
+      resetButton(originalBtnHTML);
+    }
+  });
+
+  // Extra precaution against rapid Enter key presses
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.tagName !== 'TEXTAREA') {
+      if (isSubmitting) {
+        e.preventDefault();
+      }
+    }
+  });
+
+  function showErrorAlert(msg) {
+    errorContainer.innerHTML = `
+      <div class="alert alert-error transition-base mb-8">
+        <i data-lucide="alert-triangle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> ${msg}
+      </div>
+    `;
+    lucide.createIcons();
+  }
+
+  function resetButton(originalHTML) {
+    isSubmitting = false;
+    submitBtn.disabled = false;
+    submitBtn.removeAttribute('aria-disabled');
+    cancelBtn.classList.remove('pointer-events-none', 'opacity-50');
+    submitBtn.innerHTML = originalHTML;
+  }
+
+  function showResult(status) {
+    // Hide all form fields and actions
+    Array.from(form.children).forEach(child => {
+      if (child.id !== 'result-state') {
+        child.style.display = 'none';
+      }
+    });
+    
+    const isPending = (status === 'pending');
+    
+    // Configure success/pending UI
+    resultState.classList.remove('hidden');
+    resultState.classList.add(
+      isPending ? 'bg-warning-soft' : 'bg-success-soft',
+      isPending ? 'border-warning-border' : 'border-success-light',
+      'animate-in', 'fade-in', 'zoom-in', 'duration-300'
+    );
+    
+    resultIcon.setAttribute('data-lucide', isPending ? 'clock' : 'check-circle');
+    resultIcon.classList.add(isPending ? 'text-warning' : 'text-success');
+    
+    resultTitle.textContent = isPending ? 'Pending review' : 'Published successfully';
+    resultDesc.textContent = isPending 
+      ? 'Your resource was submitted successfully and is waiting for review.'
+      : 'Your resource is now live on HelpLink.';
+      
+    lucide.createIcons();
+  }
+});
+</script>
 {% endblock %}
