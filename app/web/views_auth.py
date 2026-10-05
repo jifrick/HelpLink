@@ -266,3 +266,59 @@ def logout():
     response.delete_cookie(key="helplink_session")
     return response
 
+@router.get("/admin/login", response_class=HTMLResponse)
+def admin_login_form(
+    request: Request,
+    next: Optional[str] = None,
+    current_user: Optional[User] = Depends(get_current_user_from_cookie)
+):
+    if current_user and current_user.role == 'admin':
+        return RedirectResponse(url="/admin/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="auth/admin_login.html",
+        context={"current_user": None, "next": next or "", "error": None}
+    )
+
+@router.post("/admin/login", response_class=HTMLResponse)
+def admin_login_submit(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    next: Optional[str] = Form(""),
+    db: Session = Depends(get_db)
+):
+    from app.services.auth_service import authenticate_user
+    user = authenticate_user(db, email, password)
+    
+    if not user:
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/admin_login.html",
+            context={"current_user": None, "error": "Invalid email or password", "next": next},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    if not user.is_active:
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/admin_login.html",
+            context={"current_user": None, "error": "Your account has been deactivated.", "next": next},
+            status_code=status.HTTP_403_FORBIDDEN
+        )
+        
+    if user.role != "admin":
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/admin_login.html",
+            context={"current_user": None, "error": "Access Denied: You do not have administrator privileges.", "next": next},
+            status_code=status.HTTP_403_FORBIDDEN
+        )
+
+    target_url = next if next else "/admin/dashboard"
+    response = RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
+    token = create_access_token(user.id)
+    response.set_cookie(key="helplink_session", value=token, httponly=True, samesite="lax", max_age=60*60*24*7)
+    return response
+

@@ -42,13 +42,11 @@
             <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 1.5rem; flex-grow: 1;">
               {{ reward.description }}
             </p>
-            <form action="/rewards/{{ reward.id }}/redeem" method="POST">
               {% if current_user.helppoints_balance >= reward.cost_hp %}
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Redeem Reward</button>
+                <button type="button" class="btn btn-primary" style="width: 100%;" onclick="openModal('{{ reward.id }}', '{{ reward.name | escape }}', '{{ reward.cost_hp }}')">Redeem Reward</button>
               {% else %}
                 <button type="button" class="btn btn-secondary" style="width: 100%; opacity: 0.6; cursor: not-allowed;" disabled>Need {{ reward.cost_hp - current_user.helppoints_balance }} more HP</button>
               {% endif %}
-            </form>
           </div>
         {% endfor %}
       </div>
@@ -100,4 +98,59 @@
   </div>
 
 </div>
+
+<!-- Confirmation Modal -->
+<div id="redeemModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center;">
+  <div style="background: var(--color-surface); border-radius: var(--radius-lg); padding: 2rem; max-width: 400px; width: 90%; box-shadow: var(--shadow-lg);">
+    <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Confirm Redemption</h3>
+    <p style="margin-bottom: 0.5rem; color: var(--color-text);">Redeem "<strong id="modalRewardName"></strong>"?</p>
+    
+    <div style="background: var(--color-background); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1rem; margin-bottom: 1.5rem;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span style="color: var(--color-text-secondary);">Cost:</span>
+        <strong id="modalCost"></strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+        <span style="color: var(--color-text-secondary);">Your balance:</span>
+        <strong>{{ current_user.helppoints_balance }} HP</strong>
+      </div>
+      <div style="display: flex; justify-content: space-between; border-top: 1px solid var(--color-border); padding-top: 0.5rem; margin-top: 0.5rem;">
+        <span style="color: var(--color-text-secondary);">Remaining balance:</span>
+        <strong id="modalRemaining" style="color: var(--color-primary);"></strong>
+      </div>
+    </div>
+    
+    <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+      <button onclick="closeModal()" class="btn btn-secondary">Cancel</button>
+      <form id="modalForm" method="POST" style="margin: 0;">
+        <button type="submit" class="btn btn-primary">Redeem Reward</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openModal(rewardId, rewardName, rewardCost) {
+    const currentBalance = parseInt("{{ current_user.helppoints_balance }}", 10);
+    const remaining = currentBalance - parseInt(rewardCost, 10);
+    
+    document.getElementById('modalRewardName').textContent = rewardName;
+    document.getElementById('modalCost').textContent = rewardCost + " HP";
+    document.getElementById('modalRemaining').textContent = remaining + " HP";
+    document.getElementById('modalForm').action = "/rewards/" + rewardId + "/redeem";
+    
+    document.getElementById('redeemModal').style.display = 'flex';
+  }
+  
+  function closeModal() {
+    document.getElementById('redeemModal').style.display = 'none';
+  }
+  
+  // Close modal on escape key
+  document.addEventListener('keydown', function(event) {
+    if (event.key === "Escape") {
+      closeModal();
+    }
+  });
+</script>
 {% endblock %}

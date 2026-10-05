@@ -57,16 +57,45 @@ def delete_resource(db: Session, resource_id: int) -> bool:
     return True
 
 def get_admin_dashboard_metrics(db: Session) -> Dict[str, Any]:
+    from app.models.user import User
+    from app.models.gamification import FraudEvent, PointTransaction, RewardRedemption
+    import datetime
+    
+    today = datetime.datetime.utcnow().date()
+    
     total_resources = db.query(func.count(Resource.id)).scalar() or 0
     pending_submissions = db.query(func.count(Resource.id)).filter(Resource.status == "pending").scalar() or 0
     published_resources = db.query(func.count(Resource.id)).filter(Resource.status == "published").scalar() or 0
     total_reports = db.query(func.count(Report.id)).filter(Report.status == "pending").scalar() or 0
     total_categories = db.query(func.count(Category.id)).scalar() or 0
+    
+    # New metrics
+    total_contributors = db.query(func.count(User.id)).scalar() or 0
+    active_contributors = db.query(func.count(User.id)).filter(User.account_status == "ACTIVE").scalar() or 0
+    suspended_users = db.query(func.count(User.id)).filter(User.account_status == "SUSPENDED").scalar() or 0
+    banned_users = db.query(func.count(User.id)).filter(User.account_status == "BANNED").scalar() or 0
+    
+    resources_today = db.query(func.count(Resource.id)).filter(func.date(Resource.created_at) == today).scalar() or 0
+    
+    fraud_events = db.query(func.count(FraudEvent.id)).scalar() or 0
+    
+    total_awarded = db.query(func.sum(PointTransaction.amount)).filter(PointTransaction.amount > 0).scalar() or 0
+    total_redeemed = db.query(func.sum(PointTransaction.amount)).filter(PointTransaction.transaction_type == "REWARD_REDEMPTION").scalar() or 0
+    pending_redemptions = db.query(func.count(RewardRedemption.id)).filter(RewardRedemption.status == "PENDING").scalar() or 0
 
     return {
         "total_resources": total_resources,
         "pending_submissions": pending_submissions,
         "published_resources": published_resources,
         "total_reports": total_reports,
-        "total_categories": total_categories
+        "total_categories": total_categories,
+        "total_contributors": total_contributors,
+        "active_contributors": active_contributors,
+        "suspended_users": suspended_users,
+        "banned_users": banned_users,
+        "resources_today": resources_today,
+        "fraud_events": fraud_events,
+        "total_hp_awarded": total_awarded,
+        "total_hp_redeemed": abs(total_redeemed),
+        "pending_redemptions": pending_redemptions
     }

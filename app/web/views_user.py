@@ -187,8 +187,17 @@ def user_dashboard(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_current_user)
 ):
+    from sqlalchemy.orm import joinedload
+    from app.models.gamification import PointTransaction, UserBadge
+    from app.services.points_service import get_next_level_info
+    
     submissions = get_user_submissions(db, current_user.id)
     saved_items = get_user_saved_resources(db, current_user.id)
+    
+    # Gamification data
+    level_info = get_next_level_info(current_user.helppoints_balance)
+    recent_points = db.query(PointTransaction).filter(PointTransaction.user_id == current_user.id).order_by(PointTransaction.created_at.desc()).limit(5).all()
+    user_badges = db.query(UserBadge).options(joinedload(UserBadge.badge)).filter(UserBadge.user_id == current_user.id).order_by(UserBadge.awarded_at.desc()).all()
 
     return templates.TemplateResponse(
         request=request,
@@ -198,7 +207,10 @@ def user_dashboard(
             "submissions": submissions,
             "saved_items": saved_items,
             "submitted": submitted,
-            "submitted_status": status
+            "submitted_status": status,
+            "level_info": level_info,
+            "recent_points": recent_points,
+            "user_badges": user_badges
         }
     )
 

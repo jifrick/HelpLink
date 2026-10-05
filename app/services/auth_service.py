@@ -9,6 +9,24 @@ def generate_contributor_id() -> str:
     chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
     suffix = "".join(random.choices(chars, k=6))
     return f"HL-{suffix}"
+
+from sqlalchemy.exc import IntegrityError
+
+def _save_user_with_retry(db: Session, user: User) -> User:
+    for attempt in range(5):
+        try:
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+            return user
+        except IntegrityError as e:
+            db.rollback()
+            if "contributor_id" in str(e).lower() and attempt < 4:
+                user.contributor_id = generate_contributor_id()
+                continue
+            raise e
+    from fastapi import HTTPException
+    raise HTTPException(status_code=500, detail="Unable to create account. Please try again.")
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email.lower().strip()).first()
 
@@ -25,10 +43,7 @@ def create_user(db: Session, user_in: UserCreate, role: str = "user") -> User:
         is_active=True,
         contributor_id=generate_contributor_id()
     )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+    return _save_user_with_retry(db, user)
 
 def authenticate_user(db: Session, email: str, password: str) -> Optional[User]:
     user = get_user_by_email(db, email)
@@ -76,9 +91,7 @@ def sync_oauth_user(
             is_active=True,
             contributor_id=generate_contributor_id()
         )
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+        user = _save_user_with_retry(db, user)
     else:
         # Returning user: sync avatar if updated
         if avatar_url and user.avatar_url != avatar_url:

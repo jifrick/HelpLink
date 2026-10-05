@@ -1,0 +1,94 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{{ profile_user.full_name }} — Contributor Profile{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 3rem; padding-bottom: 5rem; max-width: 900px;">
+  
+  <!-- Profile Header -->
+  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 3rem 2rem; margin-bottom: 2rem; text-align: center; box-shadow: var(--shadow-sm);">
+    
+    <div style="width: 100px; height: 100px; background: var(--color-primary); color: white; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; margin: 0 auto 1.5rem auto;">
+      {{ profile_user.full_name[:1] | upper }}
+    </div>
+    
+    <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+      {{ profile_user.full_name }}
+      {% if profile_user.trust_score > 70 %}
+      <span style="font-size: 0.9rem; background: var(--color-success); color: white; padding: 0.1rem 0.5rem; border-radius: var(--radius-full); font-weight: 600;" title="Trusted Contributor">✓ Trusted</span>
+      {% endif %}
+    </h1>
+    
+    <div style="color: var(--color-text-secondary); font-size: 1rem; margin-bottom: 1.5rem;">
+      Contributor ID: <span style="font-family: monospace; font-weight: 600; color: var(--color-text);">{{ profile_user.contributor_id }}</span>
+      <span style="margin: 0 0.5rem;">•</span>
+      Joined {{ profile_user.created_at.strftime('%b %Y') }}
+    </div>
+    
+    <div style="display: flex; justify-content: center; gap: 2rem; color: var(--color-brand); font-weight: 700; flex-wrap: wrap;">
+      <div>
+        <div style="font-size: 1.75rem;">{{ profile_user.level }}</div>
+        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.05em;">Current Level</div>
+      </div>
+      <div>
+        <div style="font-size: 1.75rem;">{{ contribution_count }}</div>
+        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.05em;">Public Contributions</div>
+      </div>
+      <div>
+        <div style="font-size: 1.75rem;">{{ user_badges|length }}</div>
+        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.05em;">Earned Badges</div>
+      </div>
+    </div>
+    
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+    
+    <!-- Badges Showcase -->
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Earned Badges</h2>
+      
+      {% if user_badges %}
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem;">
+          {% for ub in user_badges %}
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); padding: 1rem; border-radius: var(--radius-md); text-align: center;" title="{{ ub.badge.description }}">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">{{ ub.badge.icon }}</div>
+            <div style="font-size: 0.8rem; font-weight: 700; line-height: 1.2;">{{ ub.badge.name }}</div>
+          </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div style="padding: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-align: center; color: var(--color-text-secondary); font-size: 0.95rem;">
+          No badges earned yet.
+        </div>
+      {% endif %}
+    </div>
+    
+    <!-- Recent Contributions -->
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Recent Contributions</h2>
+      
+      {% if public_contributions %}
+        <div class="resources-grid" style="grid-template-columns: 1fr; gap: 1rem;">
+          {% for res in public_contributions %}
+            {% include "components/resource_card.html" %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div style="padding: 3rem; background: var(--color-surface); border: 1px dashed var(--color-border); border-radius: var(--radius-lg); text-align: center; color: var(--color-text-secondary);">
+          <p>No public contributions available.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<style>
+  @media (max-width: 768px) {
+    div[style*="grid-template-columns: 1fr 2fr"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+{% endblock %}

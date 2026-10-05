@@ -10,21 +10,22 @@
 
     <nav aria-label="Main Navigation">
       <ul class="nav-links">
-        <li><a href="/" class="nav-link">Home</a></li>
         <li><a href="/resources" class="nav-link">Browse</a></li>
-        <li><a href="/categories" class="nav-link">Categories</a></li>
-        <li><a href="/about" class="nav-link">About</a></li>
+        {% if current_user %}
+        <li><a href="/dashboard" class="nav-link">Dashboard</a></li>
+        <li><a href="/saved" class="nav-link">Saved</a></li>
+        <li><a href="/rewards" class="nav-link">Rewards</a></li>
+        <li><a href="/profile/{{ current_user.contributor_id }}" class="nav-link">Profile</a></li>
+        {% endif %}
+        {% if current_user and current_user.role == 'admin' %}
+        <li style="margin-left: 1rem;"><a href="/admin/dashboard" class="nav-link" style="color: var(--color-brand); font-weight: 700;">Admin</a></li>
+        {% endif %}
       </ul>
     </nav>
 
     <div class="nav-actions">
       {% if current_user %}
-        <a href="/submit" class="btn btn-outline btn-sm">+ Submit Resource</a>
-        <a href="/dashboard" class="btn btn-secondary btn-sm">My Dashboard</a>
-        <a href="/rewards" class="nav-link" style="font-size: 0.88rem; font-weight: 600;">🎁 Rewards</a>
-        {% if current_user.role == 'admin' %}
-          <a href="/admin/dashboard" class="btn btn-primary btn-sm" style="background: var(--color-brand);">⚙️ Admin</a>
-        {% endif %}
+        <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
         <a href="/logout" class="nav-link" style="font-size: 0.88rem; color: var(--color-danger);">Sign Out</a>
       {% else %}
         <a href="/login" class="nav-link">Sign In</a>
@@ -42,19 +43,20 @@
 <!-- Mobile Navigation Drawer -->
 <div id="mobile-nav-drawer" class="mobile-nav-drawer">
   <ul class="mobile-nav-links">
-    <li><a href="/">Home</a></li>
     <li><a href="/resources">Browse Resources</a></li>
-    <li><a href="/categories">All Categories</a></li>
-    <li><a href="/about">About HelpLink</a></li>
+    {% if current_user %}
+    <li><a href="/dashboard">Dashboard</a></li>
+    <li><a href="/saved">Saved Resources</a></li>
+    <li><a href="/rewards">Rewards Store</a></li>
+    <li><a href="/profile/{{ current_user.contributor_id }}">My Profile</a></li>
+    {% if current_user.role == 'admin' %}
+    <li><a href="/admin/dashboard" style="color: var(--color-brand); font-weight: 700;">Admin Area</a></li>
+    {% endif %}
+    {% endif %}
   </ul>
   <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
     {% if current_user %}
       <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
-      <a href="/dashboard" class="btn btn-secondary btn-sm">My Dashboard</a>
-      <a href="/rewards" class="btn btn-outline btn-sm">🎁 Rewards Store</a>
-      {% if current_user.role == 'admin' %}
-        <a href="/admin/dashboard" class="btn btn-outline btn-sm">⚙️ Admin Dashboard</a>
-      {% endif %}
       <a href="/logout" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-danger-border);">Sign Out</a>
     {% else %}
       <a href="/login" class="btn btn-secondary btn-sm">Sign In</a>

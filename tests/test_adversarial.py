@@ -107,3 +107,37 @@ def test_point_reversal_and_audit(client, db: Session):
     assert audit is not None
     assert audit.action == "UPDATE_RESOURCE_STATUS"
     assert "published to rejected" in audit.reason
+
+def test_contributor_id_collision(client, db: Session, monkeypatch):
+    import app.services.auth_service as auth_service
+    
+    # Mock generate_contributor_id to always return the same ID
+    original_generate = auth_service.generate_contributor_id
+    
+    collision_count = 0
+    def mock_generate():
+        nonlocal collision_count
+        collision_count += 1
+        if collision_count == 1:
+            return "HL-COLLID"
+        elif collision_count == 2:
+            return "HL-COLLID"  # Force collision on second user
+        else:
+            return f"HL-FIXED{collision_count}"
+            
+    monkeypatch.setattr(auth_service, "generate_contributor_id", mock_generate)
+    
+    # Create first user
+    res1 = client.post("/register", data={"full_name": "User 1", "email": "u1@test.com", "password": "Password123!"}, follow_redirects=False)
+    assert res1.status_code == 303
+    
+    # Create second user
+    res2 = client.post("/register", data={"full_name": "User 2", "email": "u2@test.com", "password": "Password123!"}, follow_redirects=False)
+    assert res2.status_code == 303  # Should succeed thanks to retry logic!
+    
+    u1 = db.query(User).filter(User.email == "u1@test.com").first()
+    u2 = db.query(User).filter(User.email == "u2@test.com").first()
+    
+    assert u1.contributor_id == "HL-COLLID"
+    assert u2.contributor_id == "HL-FIXED3"
+    assert collision_count >= 3

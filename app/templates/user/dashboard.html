@@ -1,12 +1,12 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}User Dashboard — HelpLink{% endblock %}
+{% block title %}Contributor Command Center — HelpLink{% endblock %}
 
 {% block content %}
 <div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
 
   {% if submitted %}
-    <div class="alert {% if submitted_status == 'rejected' %}alert-error{% elif submitted_status == 'pending' %}alert-warning{% else %}alert-success{% endif %} alert-dismissible">
+    <div class="alert {% if submitted_status == 'rejected' %}alert-error{% elif submitted_status == 'pending' %}alert-warning{% else %}alert-success{% endif %} alert-dismissible" style="margin-bottom: 2rem;">
       {% if submitted_status == 'pending' %}
         ⏳ <strong>In Review:</strong> Your resource needs a quick additional review before it can be published.
       {% elif submitted_status == 'rejected' %}
@@ -17,82 +17,208 @@
     </div>
   {% endif %}
 
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
-    <div>
-      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">Welcome, {{ current_user.full_name }}</h1>
-      <div style="display: flex; gap: 1rem; align-items: center; color: var(--color-text-secondary); font-size: 0.9rem;">
-        <span style="background: var(--color-surface-hover); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">ID: {{ current_user.contributor_id }}</span>
-        <span><strong style="color: var(--color-primary);">{{ current_user.helppoints_balance }} HP</strong></span>
-        <span><span class="badge badge-published">{{ current_user.level }}</span></span>
-        {% if current_user.account_status != 'ACTIVE' %}
-          <span class="badge badge-rejected">{{ current_user.account_status }}</span>
+  <!-- Hero Section -->
+  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-sm);">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-start; gap: 2rem;">
+      <div style="flex: 1 1 300px;">
+        <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.75rem;">
+          Welcome back, {{ current_user.full_name }}
+          {% if current_user.trust_score > 70 %}
+          <span style="font-size: 0.9rem; background: var(--color-success); color: white; padding: 0.1rem 0.5rem; border-radius: var(--radius-full); font-weight: 600;" title="Trusted Contributor">✓ Trusted</span>
+          {% endif %}
+        </h1>
+        
+        <div style="display: flex; gap: 0.75rem; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap;">
+          <span style="background: var(--color-background); border: 1px solid var(--color-border); padding: 0.25rem 0.75rem; border-radius: var(--radius-md); font-family: monospace; font-weight: 600; color: var(--color-text-secondary); font-size: 0.9rem;">ID: {{ current_user.contributor_id }}</span>
+          <span class="badge badge-published" style="font-size: 0.9rem;">{{ current_user.level }}</span>
+          {% if current_user.account_status != 'ACTIVE' %}
+            <span class="badge badge-rejected" style="font-size: 0.9rem;">{{ current_user.account_status }}</span>
+          {% endif %}
+        </div>
+        
+        <div style="display: flex; gap: 2rem; color: var(--color-text-secondary);">
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-text);">{{ submissions|length }}</div>
+            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Contributions</div>
+          </div>
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-primary);">{{ current_user.helppoints_balance }}</div>
+            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">HelpPoints</div>
+          </div>
+          <div>
+            <div style="font-size: 1.5rem; font-weight: 700; color: var(--color-warning);">{{ user_badges|length }}</div>
+            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600;">Badges</div>
+          </div>
+        </div>
+      </div>
+      
+      <div style="flex: 0 1 400px; background: var(--color-background); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 1.5rem;">
+        <h3 style="font-weight: 700; margin-bottom: 0.75rem; font-size: 1.1rem; color: var(--color-brand); text-transform: uppercase;">Level Progress</h3>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-weight: 600; font-size: 0.95rem;">
+          <span style="color: var(--color-text);">{{ current_user.level }}</span>
+          {% if not level_info.is_max %}
+          <span style="color: var(--color-text-secondary);">{{ current_user.helppoints_balance }} / {{ level_info.next_threshold }} HP</span>
+          {% else %}
+          <span style="color: var(--color-primary);">MAX LEVEL REACHED</span>
+          {% endif %}
+        </div>
+        
+        <div style="height: 12px; background: var(--color-border); border-radius: var(--radius-full); overflow: hidden; margin-bottom: 0.75rem;">
+          <div style="height: 100%; background: var(--color-primary); width: {{ level_info.progress_percent }}%; border-radius: var(--radius-full); transition: width 0.5s ease;"></div>
+        </div>
+        
+        {% if not level_info.is_max %}
+        <div style="font-size: 0.85rem; color: var(--color-text-secondary);">
+          <strong>{{ level_info.points_needed }} HelpPoints</strong> needed to reach <span style="font-weight: 600; color: var(--color-text);">{{ level_info.next_level_name }}</span>.
+        </div>
+        {% else %}
+        <div style="font-size: 0.85rem; color: var(--color-text-secondary);">
+          You have reached the highest contributor level. Thank you for your incredible support!
+        </div>
         {% endif %}
       </div>
     </div>
-    <a href="/submit" class="btn btn-primary">+ Submit New Resource</a>
   </div>
-
-  <!-- Submissions Table / Cards -->
-  <div style="margin-bottom: 3.5rem;">
-    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">My Submissions</h2>
-
-    {% if submissions %}
-      <div class="table-responsive">
-        <table class="admin-table">
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Category</th>
-              <th>Type</th>
-              <th>Location</th>
-              <th>Status</th>
-              <th>Date</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for res in submissions %}
+  
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    
+    <!-- Left Column: Activity & Badges -->
+    <div>
+      <!-- Badges -->
+      <div style="margin-bottom: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">Earned Badges</h2>
+          <a href="/profile/{{ current_user.contributor_id }}" class="btn btn-outline btn-sm">Public Profile &rarr;</a>
+        </div>
+        
+        {% if user_badges %}
+        <div style="display: flex; flex-wrap: wrap; gap: 1rem;">
+          {% for ub in user_badges %}
+          <div style="background: var(--color-background); border: 1px solid var(--color-border); padding: 1rem; border-radius: var(--radius-md); text-align: center; width: 120px;">
+            <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">{{ ub.badge.icon }}</div>
+            <div style="font-size: 0.85rem; font-weight: 700; line-height: 1.2;">{{ ub.badge.name }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 2rem; background: var(--color-background); border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
+          <div style="font-size: 2.5rem; filter: grayscale(100%); opacity: 0.5; margin-bottom: 0.5rem;">🏆</div>
+          <p style="color: var(--color-text-secondary); font-size: 0.95rem;">Your contribution journey starts here. Earn badges by sharing useful resources.</p>
+        </div>
+        {% endif %}
+      </div>
+      
+      <!-- Submissions -->
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">Contribution History</h2>
+          <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
+        </div>
+        
+        {% if submissions %}
+        <div class="table-responsive">
+          <table class="admin-table">
+            <thead>
               <tr>
-                <td style="font-weight: 600;">
-                  <a href="/resources/{{ res.slug }}">{{ res.title }}</a>
-                </td>
-                <td>{{ res.category.name if res.category else 'Uncategorized' }}</td>
-                <td>{{ res.resource_type }}</td>
-                <td>📍 {{ res.location }}</td>
-                <td>
-                  <span class="badge badge-{{ res.status }}">{{ res.status|capitalize }}</span>
-                </td>
-                <td>{{ res.created_at.strftime('%b %d, %Y') }}</td>
+                <th>Resource</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Date</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {% for res in submissions %}
+                <tr>
+                  <td style="font-weight: 600;">
+                    <a href="/resources/{{ res.slug }}">{{ res.title }}</a>
+                  </td>
+                  <td>{{ res.category.name if res.category else 'Uncategorized' }}</td>
+                  <td>
+                    <span class="badge badge-{{ 'published' if res.status == 'published' else 'rejected' if res.status == 'rejected' else 'pending' }}">{{ res.status|capitalize }}</span>
+                  </td>
+                  <td>{{ res.created_at.strftime('%b %d, %Y') }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div style="background: var(--color-background); padding: 3rem; text-align: center; border-radius: var(--radius-md); border: 1px dashed var(--color-border);">
+          <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">Help someone discover something useful.</p>
+          <a href="/submit" class="btn btn-primary btn-sm">Share your first resource</a>
+        </div>
+        {% endif %}
       </div>
-    {% else %}
-      <div style="background: var(--color-surface); padding: 3rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-        <p style="color: var(--color-text-secondary); margin-bottom: 1rem;">You haven't submitted any resources yet.</p>
-        <a href="/submit" class="btn btn-outline btn-sm">Share your first resource &rarr;</a>
-      </div>
-    {% endif %}
-  </div>
-
-  <!-- Saved Bookmarks -->
-  <div>
-    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
-      <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">My Saved Bookmarks</h2>
-      <a href="/saved" class="btn btn-secondary btn-sm">View All Saved &rarr;</a>
     </div>
-
-    {% if saved_items %}
-      <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));">
-        {% for res in saved_items %}
-          {% include "components/resource_card.html" %}
-        {% endfor %}
+    
+    <!-- Right Column: Points & Saved -->
+    <div>
+      <!-- HelpPoints Card -->
+      <div style="margin-bottom: 2rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand);">HelpPoints</h2>
+          <a href="/rewards" class="btn btn-secondary btn-sm">Rewards &rarr;</a>
+        </div>
+        
+        <p style="color: var(--color-text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">HelpPoints recognize useful contributions to the HelpLink community.</p>
+        
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--color-border);">Recent Activity</h3>
+        
+        {% if recent_points %}
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+          {% for tx in recent_points %}
+          <li style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-border);">
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem; color: var(--color-text);">{{ tx.description or tx.transaction_type }}</div>
+              <div style="font-size: 0.8rem; color: var(--color-text-secondary);">{{ tx.created_at.strftime('%b %d, %I:%M %p') }}</div>
+            </div>
+            <div style="font-weight: 700; font-size: 1.1rem; {% if tx.amount > 0 %}color: var(--color-success);{% elif tx.amount < 0 %}color: var(--color-danger);{% else %}color: var(--color-text-secondary);{% endif %}">
+              {% if tx.amount > 0 %}+{% endif %}{{ tx.amount }}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div style="text-align: center; padding: 2rem 0; color: var(--color-text-secondary); font-size: 0.95rem;">
+          No point history yet.
+        </div>
+        {% endif %}
       </div>
-    {% else %}
-      <div style="background: var(--color-surface); padding: 2.5rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
-        <p style="color: var(--color-text-secondary);">You haven't saved any resources yet. Click "🤍 Save" on any resource card to bookmark it.</p>
+      
+      <!-- Saved Resources -->
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand);">Saved Bookmarks</h2>
+          <a href="/saved" style="font-size: 0.9rem; font-weight: 600; color: var(--color-primary);">View All</a>
+        </div>
+        
+        {% if saved_items %}
+        <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+          {% for res in saved_items[:3] %}
+          <li>
+            <a href="/resources/{{ res.slug }}" style="display: block; font-weight: 600; font-size: 0.95rem; color: var(--color-text); text-decoration: none; padding: 0.5rem; border-radius: var(--radius-sm); border: 1px solid transparent; transition: all 0.2s ease;" onmouseover="this.style.background='var(--color-background)'; this.style.borderColor='var(--color-border)';" onmouseout="this.style.background='transparent'; this.style.borderColor='transparent';">
+              {{ res.title }}
+              <div style="font-size: 0.8rem; color: var(--color-text-secondary); font-weight: 400; margin-top: 0.25rem;">{{ res.category.name if res.category else 'Uncategorized' }}</div>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div style="text-align: center; padding: 1.5rem 0; color: var(--color-text-secondary); font-size: 0.9rem;">
+          No saved resources yet.
+        </div>
+        {% endif %}
       </div>
-    {% endif %}
+    </div>
+    
   </div>
 </div>
+
+<style>
+  @media (max-width: 900px) {
+    div[style*="grid-template-columns: 2fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
 {% endblock %}

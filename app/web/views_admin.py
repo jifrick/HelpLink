@@ -183,3 +183,114 @@ def admin_create_category(
     create_category(db, cat_in)
 
     return RedirectResponse(url="/admin/categories?created=true", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.get("/contributors", response_class=HTMLResponse)
+def admin_contributors(
+    request: Request,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_admin_user)
+):
+    users = db.query(User).order_by(User.created_at.desc()).limit(100).all()
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/contributors.html",
+        context={"current_user": admin_user, "users": users}
+    )
+
+@router.get("/contributors/{user_id}", response_class=HTMLResponse)
+def admin_contributor_detail(
+    user_id: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_admin_user)
+):
+    from sqlalchemy.orm import joinedload
+    from app.models.gamification import PointTransaction, FraudEvent, RewardRedemption, UserBadge
+    from app.models.resource import Resource
+    
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    transactions = db.query(PointTransaction).filter(PointTransaction.user_id == target_user.id).order_by(PointTransaction.created_at.desc()).limit(20).all()
+    fraud_events = db.query(FraudEvent).filter(FraudEvent.user_id == target_user.id).order_by(FraudEvent.created_at.desc()).all()
+    resources = db.query(Resource).filter(Resource.user_id == target_user.id).order_by(Resource.created_at.desc()).limit(10).all()
+    redemptions = db.query(RewardRedemption).options(joinedload(RewardRedemption.reward)).filter(RewardRedemption.user_id == target_user.id).order_by(RewardRedemption.created_at.desc()).all()
+    badges = db.query(UserBadge).options(joinedload(UserBadge.badge)).filter(UserBadge.user_id == target_user.id).order_by(UserBadge.awarded_at.desc()).all()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/contributor_detail.html",
+        context={
+            "current_user": admin_user,
+            "target_user": target_user,
+            "transactions": transactions,
+            "fraud_events": fraud_events,
+            "resources": resources,
+            "redemptions": redemptions,
+            "badges": badges
+        }
+    )
+
+@router.post("/contributors/{user_id}/points")
+def admin_adjust_points(
+    user_id: int,
+    amount: int = Form(...),
+    reason: str = Form(...),
+    action_type: str = Form(...),
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_admin_user),
+    _: None = Depends(validate_csrf_and_origin)
+):
+    from app.services.points_service import award_points, deduct_points
+    from app.services.moderation_service import log_admin_action
+    
+    target_user = db.query(User).filter(User.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    if action_type == "add":
+        award_points(db, user_id, amount, "ADMIN_ADJUSTMENT", description=f"Admin: {reason}")
+        log_admin_action(db, admin_user.id, "AWARD_POINTS", f"User {user_id}", f"Awarded {amount} HP: {reason}")
+    elif action_type == "deduct":
+        deduct_points(db, user_id, amount, "ADMIN_ADJUSTMENT", description=f"Admin: {reason}", force=True)
+        log_admin_action(db, admin_user.id, "DEDUCT_POINTS", f"User {user_id}", f"Deducted {amount} HP: {reason}")
+    else:
+        raise HTTPException(status_code=400, detail="Invalid action")
+        
+    return RedirectResponse(url=f"/admin/contributors/{user_id}", status_code=status.HTTP_303_SEE_OTHER)
+
+@router.get("/rewards", response_class=HTMLResponse)
+def admin_rewards_view(
+    request: Request,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_admin_user)
+):
+    from app.models.gamification import Reward, RewardRedemption
+    from sqlalchemy.orm import joinedload
+    
+    rewards = db.query(Reward).order_by(Reward.cost_hp).all()
+    redemptions = db.query(RewardRedemption).options(joinedload(RewardRedemption.reward), joinedload(RewardRedemption.user)).order_by(RewardRedemption.created_at.desc()).limit(50).all()
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/rewards.html",
+        context={"current_user": admin_user, "rewards": rewards, "redemptions": redemptions}
+    )
+
+@router.get("/audit-logs", response_class=HTMLResponse)
+def admin_audit_logs(
+    request: Request,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_admin_user)
+):
+    from app.models.gamification import AdminAuditLog
+    from sqlalchemy.orm import joinedload
+    
+    logs = db.query(AdminAuditLog).options(joinedload(AdminAuditLog.admin)).order_by(AdminAuditLog.created_at.desc()).limit(200).all()
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/audit_logs.html",
+        context={"current_user": admin_user, "logs": logs}
+    )

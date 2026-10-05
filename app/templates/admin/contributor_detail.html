@@ -1,0 +1,155 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Contributor Detail — Admin{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+
+  <div style="margin-bottom: 2rem;">
+    <a href="/admin/contributors" style="color: var(--color-text-secondary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 0.5rem;">
+      &larr; Back to Contributors
+    </a>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">{{ target_user.full_name }}</h1>
+      <div style="display: flex; gap: 1rem; align-items: center; color: var(--color-text-secondary); font-size: 0.9rem;">
+        <span style="font-family: monospace; font-weight: 600;">ID: {{ target_user.contributor_id }}</span>
+        <span>{{ target_user.email }}</span>
+        <span class="badge badge-{{ 'published' if target_user.account_status == 'ACTIVE' else 'rejected' }}">{{ target_user.account_status }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+    
+    <!-- Left Column: Gamification & Resources -->
+    <div>
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1.5rem;">Gamification Status</h2>
+        
+        <div style="display: flex; justify-content: space-between; text-align: center; margin-bottom: 2rem;">
+          <div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--color-primary);">{{ target_user.helppoints_balance }}</div>
+            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600; color: var(--color-text-secondary);">HelpPoints</div>
+          </div>
+          <div>
+            <div style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">{{ target_user.level }}</div>
+            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600; color: var(--color-text-secondary);">Current Level</div>
+          </div>
+          <div>
+            <div style="font-size: 2rem; font-weight: 800; color: {% if target_user.trust_score > 70 %}var(--color-success){% elif target_user.trust_score < 30 %}var(--color-danger){% else %}var(--color-text){% endif %};">{{ target_user.trust_score }}</div>
+            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600; color: var(--color-text-secondary);">Trust Score</div>
+          </div>
+          <div>
+            <div style="font-size: 2rem; font-weight: 800; color: {% if target_user.fraud_risk_score > 50 %}var(--color-danger){% else %}var(--color-text){% endif %};">{{ target_user.fraud_risk_score }}</div>
+            <div style="font-size: 0.85rem; text-transform: uppercase; font-weight: 600; color: var(--color-text-secondary);">Fraud Risk</div>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Earned Badges</h3>
+        {% if badges %}
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+            {% for b in badges %}
+              <span class="badge badge-published" style="font-size: 0.85rem;">{{ b.badge.icon }} {{ b.badge.name }}</span>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p style="color: var(--color-text-secondary); font-size: 0.9rem;">No badges earned.</p>
+        {% endif %}
+      </div>
+
+      <!-- Point Transactions -->
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Point Transactions</h2>
+        {% if transactions %}
+          <div class="table-responsive">
+            <table class="admin-table" style="font-size: 0.9rem;">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for tx in transactions %}
+                  <tr>
+                    <td style="color: var(--color-text-secondary);">{{ tx.created_at.strftime('%b %d, %H:%M') }}</td>
+                    <td style="font-weight: 700; {% if tx.amount > 0 %}color: var(--color-success);{% else %}color: var(--color-danger);{% endif %}">
+                      {{ '+ ' if tx.amount > 0 else '' }}{{ tx.amount }}
+                    </td>
+                    <td>{{ tx.transaction_type }}</td>
+                    <td>{{ tx.description }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p style="color: var(--color-text-secondary);">No point transactions.</p>
+        {% endif %}
+      </div>
+    </div>
+    
+    <!-- Right Column: Actions & Redemptions -->
+    <div>
+      <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Adjust HelpPoints</h2>
+        <form action="/admin/contributors/{{ target_user.id }}/points" method="POST" onsubmit="return confirm('Are you sure you want to manually adjust points for this user?');">
+          <input type="hidden" name="csrf_token" value="">
+          
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Action</label>
+            <select name="action_type" class="form-control" style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+              <option value="add">Award Points (+)</option>
+              <option value="deduct">Deduct Points (-)</option>
+            </select>
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1rem;">
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Amount</label>
+            <input type="number" name="amount" min="1" max="10000" class="form-control" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+          </div>
+          
+          <div class="form-group" style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-weight: 600; margin-bottom: 0.5rem; font-size: 0.9rem;">Reason</label>
+            <input type="text" name="reason" class="form-control" placeholder="e.g. Community event winner" required style="width: 100%; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: var(--radius-md);">
+          </div>
+          
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Submit Adjustment</button>
+        </form>
+      </div>
+
+      <!-- Fraud Events -->
+      <div style="background: var(--color-surface); border: 1px solid var(--color-danger); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-danger); margin-bottom: 1rem;">Fraud & Flags</h2>
+        {% if fraud_events %}
+          <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.75rem;">
+            {% for evt in fraud_events %}
+              <li style="font-size: 0.9rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-border);">
+                <strong>{{ evt.event_type }}</strong> (Sev: {{ evt.severity }})<br>
+                <span style="color: var(--color-text-secondary);">{{ evt.created_at.strftime('%b %d, %Y') }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p style="color: var(--color-text-secondary); font-size: 0.9rem;">No fraud events on record.</p>
+        {% endif %}
+      </div>
+      
+    </div>
+  </div>
+
+</div>
+<style>
+  @media (max-width: 900px) {
+    div[style*="grid-template-columns: 2fr 1fr"] {
+      grid-template-columns: 1fr !important;
+    }
+  }
+</style>
+{% endblock %}

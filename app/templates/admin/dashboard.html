@@ -10,16 +10,21 @@
       <p style="color: var(--color-text-secondary);">Overview of platform metrics, pending submissions, and community reports</p>
     </div>
 
-    <div style="display: flex; gap: 0.5rem;">
-      <a href="/admin/moderation" class="btn btn-primary btn-sm">Moderation Queue</a>
-      <a href="/admin/fraud-events" class="btn btn-primary btn-sm" style="background: var(--color-danger); border-color: var(--color-danger);">Fraud Events</a>
-      <a href="/admin/reports" class="btn btn-secondary btn-sm">Reports</a>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
+      <a href="/admin/dashboard" class="btn btn-outline btn-sm" style="border-color: var(--color-brand); color: var(--color-brand);">Overview</a>
+      <a href="/admin/moderation" class="btn btn-outline btn-sm">Moderation Queue</a>
+      <a href="/admin/contributors" class="btn btn-outline btn-sm">Contributors & Points</a>
+      <a href="/admin/rewards" class="btn btn-outline btn-sm">Rewards</a>
+      <a href="/admin/fraud-events" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-danger);">Fraud Events</a>
+      <a href="/admin/reports" class="btn btn-outline btn-sm">Reports</a>
       <a href="/admin/categories" class="btn btn-outline btn-sm">Categories</a>
+      <a href="/admin/audit-logs" class="btn btn-outline btn-sm">Audit Logs</a>
     </div>
   </div>
 
-  <!-- Metric Cards Grid -->
-  <div class="metrics-row">
+  <!-- Content Metrics Row -->
+  <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Content & Moderation</h2>
+  <div class="metrics-row" style="margin-bottom: 2rem;">
     <div class="metric-card">
       <div class="meta-item-label">Total Resources</div>
       <div class="metric-value">{{ metrics.total_resources }}</div>
@@ -39,6 +44,31 @@
     <div class="metric-card">
       <div class="meta-item-label">Categories</div>
       <div class="metric-value">{{ metrics.total_categories }}</div>
+    </div>
+  </div>
+
+  <!-- Gamification & Community Metrics Row -->
+  <h2 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Gamification & Community</h2>
+  <div class="metrics-row" style="margin-bottom: 3.5rem;">
+    <div class="metric-card">
+      <div class="meta-item-label">Total Contributors</div>
+      <div class="metric-value">{{ metrics.total_contributors }}</div>
+    </div>
+    <div class="metric-card">
+      <div class="meta-item-label">Active / Banned</div>
+      <div class="metric-value"><span style="color: var(--color-success);">{{ metrics.active_contributors }}</span> / <span style="color: var(--color-danger);">{{ metrics.banned_users }}</span></div>
+    </div>
+    <div class="metric-card" style="border-left: 4px solid var(--color-primary);">
+      <div class="meta-item-label">HP Awarded</div>
+      <div class="metric-value" style="color: var(--color-primary);">{{ metrics.total_hp_awarded }}</div>
+    </div>
+    <div class="metric-card" style="border-left: 4px solid var(--color-brand);">
+      <div class="meta-item-label">HP Redeemed</div>
+      <div class="metric-value" style="color: var(--color-brand);">{{ metrics.total_hp_redeemed }}</div>
+    </div>
+    <div class="metric-card" style="border-left: 4px solid var(--color-danger);">
+      <div class="meta-item-label">Fraud Events</div>
+      <div class="metric-value" style="color: var(--color-danger);">{{ metrics.fraud_events }}</div>
     </div>
   </div>
 

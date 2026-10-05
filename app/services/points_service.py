@@ -26,6 +26,41 @@ def get_level_for_points(points: int) -> str:
             return name
     return "New Contributor"
 
+def get_next_level_info(points: int) -> dict:
+    current_idx = 0
+    # Thresholds are in descending order
+    for i, (threshold, name) in enumerate(LEVEL_THRESHOLDS):
+        if points >= threshold:
+            current_idx = i
+            break
+            
+    if current_idx == 0:
+        # Max level reached
+        return {
+            "is_max": True,
+            "next_level_name": None,
+            "points_needed": 0,
+            "current_threshold": LEVEL_THRESHOLDS[0][0],
+            "next_threshold": LEVEL_THRESHOLDS[0][0],
+            "progress_percent": 100
+        }
+        
+    next_threshold, next_level_name = LEVEL_THRESHOLDS[current_idx - 1]
+    current_threshold = LEVEL_THRESHOLDS[current_idx][0]
+    
+    range_total = next_threshold - current_threshold
+    points_in_range = points - current_threshold
+    percent = int((points_in_range / range_total) * 100) if range_total > 0 else 100
+    
+    return {
+        "is_max": False,
+        "next_level_name": next_level_name,
+        "points_needed": next_threshold - points,
+        "current_threshold": current_threshold,
+        "next_threshold": next_threshold,
+        "progress_percent": min(100, max(0, percent))
+    }
+
 def recalculate_user_level(db: Session, user: User) -> bool:
     new_level = get_level_for_points(user.helppoints_balance)
     if user.level != new_level:

@@ -147,6 +147,37 @@ def about_page(request: Request, current_user: Optional[User] = Depends(get_curr
 def privacy_page(request: Request, current_user: Optional[User] = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse(request=request, name="pages/privacy.html", context={"current_user": current_user})
 
+@router.get("/profile/{contributor_id}", response_class=HTMLResponse)
+def public_profile(
+    contributor_id: str,
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: Optional[User] = Depends(get_current_user_from_cookie)
+):
+    from sqlalchemy.orm import joinedload
+    from app.models.gamification import UserBadge
+    from app.models.resource import Resource
+    
+    target_user = db.query(User).filter(User.contributor_id == contributor_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Contributor not found")
+        
+    user_badges = db.query(UserBadge).options(joinedload(UserBadge.badge)).filter(UserBadge.user_id == target_user.id).order_by(UserBadge.awarded_at.desc()).all()
+    public_contributions = db.query(Resource).filter(Resource.user_id == target_user.id, Resource.status == "published").order_by(Resource.created_at.desc()).limit(10).all()
+    contribution_count = db.query(Resource).filter(Resource.user_id == target_user.id, Resource.status == "published").count()
+
+    return templates.TemplateResponse(
+        request=request,
+        name="pages/profile.html",
+        context={
+            "current_user": current_user,
+            "profile_user": target_user,
+            "user_badges": user_badges,
+            "public_contributions": public_contributions,
+            "contribution_count": contribution_count
+        }
+    )
+
 @router.get("/terms", response_class=HTMLResponse)
 def terms_page(request: Request, current_user: Optional[User] = Depends(get_current_user_from_cookie)):
     return templates.TemplateResponse(request=request, name="pages/terms.html", context={"current_user": current_user})
