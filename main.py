@@ -70,7 +70,7 @@ async def general_exception_handler(request: Request, exc: Exception):
     return templates.TemplateResponse(
         request=request,
         name="errors/500.html",
-        context={"current_user": None},
+        context={"current_user": None, "exc_msg": str(exc)},
         status_code=500
     )
 
