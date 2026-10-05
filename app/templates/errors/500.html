@@ -9,12 +9,7 @@
   <p style="color: var(--color-text-secondary); font-size: 1.1rem; margin-bottom: 2rem;">
     An unexpected error occurred while processing your request. Please try returning home or exploring resources.
   </p>
-  {% if exc_msg %}
-  <div style="background: #fee2e2; border: 1px solid #ef4444; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; text-align: left; overflow: auto; max-width: 100%;">
-    <strong>Error Detail:</strong>
-    <pre style="white-space: pre-wrap; font-size: 0.85rem; margin-top: 0.5rem;">{{ exc_msg }}</pre>
-  </div>
-  {% endif %}
+
   <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
     <a href="/" class="btn btn-primary">Return to Safety (Home)</a>
     <a href="/resources" class="btn btn-secondary">Browse All Resources</a>

@@ -32,7 +32,7 @@ def home_page(
 
     return templates.TemplateResponse(
         request=request,
-        name="public/home.html",
+        name="pages/home.html",
         context={
             "current_user": current_user,
             "categories": categories,
@@ -71,7 +71,7 @@ def browse_resources(
 
     return templates.TemplateResponse(
         request=request,
-        name="public/browse.html",
+        name="pages/browse.html",
         context={
             "current_user": current_user,
             "resources": resources,
@@ -114,7 +114,7 @@ def resource_detail(
 
     return templates.TemplateResponse(
         request=request,
-        name="public/detail.html",
+        name="pages/detail.html",
         context={
             "current_user": current_user,
             "resource": resource,
@@ -132,7 +132,7 @@ def categories_page(
     categories = get_categories(db)
     return templates.TemplateResponse(
         request=request,
-        name="public/categories.html",
+        name="pages/categories.html",
         context={
             "current_user": current_user,
             "categories": categories
@@ -141,12 +141,12 @@ def categories_page(
 
 @router.get("/about", response_class=HTMLResponse)
 def about_page(request: Request, current_user: Optional[User] = Depends(get_current_user_from_cookie)):
-    return templates.TemplateResponse(request=request, name="public/about.html", context={"current_user": current_user})
+    return templates.TemplateResponse(request=request, name="pages/about.html", context={"current_user": current_user})
 
 @router.get("/privacy", response_class=HTMLResponse)
 def privacy_page(request: Request, current_user: Optional[User] = Depends(get_current_user_from_cookie)):
-    return templates.TemplateResponse(request=request, name="public/privacy.html", context={"current_user": current_user})
+    return templates.TemplateResponse(request=request, name="pages/privacy.html", context={"current_user": current_user})
 
 @router.get("/terms", response_class=HTMLResponse)
 def terms_page(request: Request, current_user: Optional[User] = Depends(get_current_user_from_cookie)):
-    return templates.TemplateResponse(request=request, name="public/terms.html", context={"current_user": current_user})
+    return templates.TemplateResponse(request=request, name="pages/terms.html", context={"current_user": current_user})
