@@ -53,7 +53,23 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException):
             status_code=404
         )
     
-    # Return HTML response containing exception detail for 400, 401, 403
+    if exc.status_code == 401:
+        return templates.TemplateResponse(
+            request=request,
+            name="errors/401.html",
+            context={"current_user": None, "detail": exc.detail},
+            status_code=401
+        )
+        
+    if exc.status_code == 403:
+        return templates.TemplateResponse(
+            request=request,
+            name="errors/403.html",
+            context={"current_user": None, "detail": exc.detail},
+            status_code=403
+        )
+    
+    # Fallback for other errors (like 400)
     return HTMLResponse(
         content=f"<!DOCTYPE html><html><body><h1>{exc.status_code} Error</h1><p>{exc.detail}</p></body></html>",
         status_code=exc.status_code

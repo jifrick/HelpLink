@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Server Error — HelpLink{% endblock %}
+{% block title %}Access Denied — HelpLink{% endblock %}
 
 {% block content %}
 <div class="container" style="padding: 6rem 1.5rem; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 70vh;">
@@ -9,23 +9,23 @@
     
     <div style="display: flex; justify-content: center; margin-bottom: 1.5rem;">
       <div style="width: 80px; height: 80px; background: var(--color-background); border: 2px dashed var(--color-danger); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">
-        ⚡
+        ⛔
       </div>
     </div>
     
-    <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">System Glitch</h1>
+    <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">Access Denied</h1>
     
-    <p style="color: var(--color-text-secondary); font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.6;">
-      An unexpected error occurred while processing your request. Our automated systems have logged the incident and our team is looking into it.
+    <p style="color: var(--color-text-secondary); font-size: 1.05rem; margin-bottom: 2rem; line-height: 1.6;">
+      {% if detail %}
+        {{ detail }}
+      {% else %}
+        You do not have the required permissions to access this page.
+      {% endif %}
     </p>
 
-    <div style="background: var(--color-background); padding: 1rem; border-radius: var(--radius-md); font-family: monospace; color: var(--color-text-muted); font-size: 0.85rem; margin-bottom: 2rem;">
-      Error Code: 500 INTERNAL_SERVER_ERROR
-    </div>
-
     <div style="display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center;">
-      <a href="/" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Return to Homepage</a>
-      <a href="javascript:window.history.back()" class="btn btn-outline" style="padding: 0.75rem 1.5rem;">Go Back</a>
+      <a href="/dashboard" class="btn btn-primary" style="padding: 0.75rem 1.5rem;">Go to Dashboard</a>
+      <a href="/" class="btn btn-outline" style="padding: 0.75rem 1.5rem;">Return Home</a>
     </div>
 
   </div>
