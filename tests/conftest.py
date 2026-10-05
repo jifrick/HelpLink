@@ -6,7 +6,13 @@ from sqlalchemy.pool import StaticPool
 
 from app.db.session import Base, get_db
 from app.db.init_db import init_db
+from app.core.config import settings
 from main import app
+
+@pytest.fixture(autouse=True)
+def default_settings(monkeypatch):
+    monkeypatch.setattr(settings, "AUTH_BYPASS_ENABLED", False)
+
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
