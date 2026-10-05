@@ -1,7 +1,18 @@
 /* HelpLink Frontend Application Logic */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 1. Toast Notification Auto Dismiss
+  // 1. Mobile Navigation Toggle
+  const mobileToggle = document.getElementById('mobile-nav-toggle');
+  const mobileDrawer = document.getElementById('mobile-nav-drawer');
+
+  if (mobileToggle && mobileDrawer) {
+    mobileToggle.addEventListener('click', () => {
+      const isExpanded = mobileDrawer.classList.toggle('active');
+      mobileToggle.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+    });
+  }
+
+  // 2. Toast Notification Auto Dismiss
   const alerts = document.querySelectorAll('.alert-dismissible');
   alerts.forEach(alert => {
     setTimeout(() => {
@@ -11,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 4000);
   });
 
-  // 2. Resource Bookmark / Save Toggle
+  // 3. Resource Bookmark / Save Toggle
   const saveButtons = document.querySelectorAll('.btn-save-toggle');
   saveButtons.forEach(btn => {
     btn.addEventListener('click', async (e) => {
@@ -48,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 3. Share Resource Functionality
+  // 4. Share Resource Functionality
   const shareButtons = document.querySelectorAll('.btn-share');
   shareButtons.forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -59,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
           await navigator.share({ title: title, text: 'Check out this useful resource on HelpLink:', url: url });
         } catch (err) {
-          // Fallback to copy link if user cancelled or unsupported
           copyToClipboard(url);
         }
       } else {
@@ -68,7 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 4. Report Modal Handler
+  // 5. Report Modal & Keyboard ESC Listener
   const openReportBtn = document.getElementById('open-report-modal');
   const reportModal = document.getElementById('report-modal');
   const closeReportBtn = document.getElementById('close-report-modal');
@@ -91,13 +101,19 @@ document.addEventListener('DOMContentLoaded', () => {
         reportModal.classList.remove('active');
       }
     });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && reportModal.classList.contains('active')) {
+        reportModal.classList.remove('active');
+      }
+    });
   }
 });
 
 function copyToClipboard(text) {
   navigator.clipboard.writeText(text).then(() => {
     showToast('Link copied to clipboard!');
-  }).catch(err => {
+  }).catch(() => {
     showToast('Failed to copy link.');
   });
 }

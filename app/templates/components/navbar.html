@@ -8,7 +8,7 @@
       {% endif %}
     </a>
 
-    <nav>
+    <nav aria-label="Main Navigation">
       <ul class="nav-links">
         <li><a href="/" class="nav-link">Home</a></li>
         <li><a href="/resources" class="nav-link">Browse</a></li>
@@ -22,7 +22,7 @@
         <a href="/submit" class="btn btn-outline btn-sm">+ Submit Resource</a>
         <a href="/dashboard" class="btn btn-secondary btn-sm">My Dashboard</a>
         {% if current_user.role == 'admin' %}
-          <a href="/admin/dashboard" class="btn btn-primary btn-sm" style="background: #0F172A;">⚙️ Admin</a>
+          <a href="/admin/dashboard" class="btn btn-primary btn-sm" style="background: var(--color-brand);">⚙️ Admin</a>
         {% endif %}
         <a href="/logout" class="nav-link" style="font-size: 0.88rem; color: var(--color-danger);">Sign Out</a>
       {% else %}
@@ -30,5 +30,33 @@
         <a href="/register" class="btn btn-primary btn-sm">Join HelpLink</a>
       {% endif %}
     </div>
+
+    <!-- Mobile Hamburger Toggle Button -->
+    <button type="button" id="mobile-nav-toggle" class="mobile-nav-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
+      ☰
+    </button>
   </div>
 </header>
+
+<!-- Mobile Navigation Drawer -->
+<div id="mobile-nav-drawer" class="mobile-nav-drawer">
+  <ul class="mobile-nav-links">
+    <li><a href="/">Home</a></li>
+    <li><a href="/resources">Browse Resources</a></li>
+    <li><a href="/categories">All Categories</a></li>
+    <li><a href="/about">About HelpLink</a></li>
+  </ul>
+  <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+    {% if current_user %}
+      <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
+      <a href="/dashboard" class="btn btn-secondary btn-sm">My Dashboard</a>
+      {% if current_user.role == 'admin' %}
+        <a href="/admin/dashboard" class="btn btn-outline btn-sm">⚙️ Admin Dashboard</a>
+      {% endif %}
+      <a href="/logout" class="btn btn-outline btn-sm" style="color: var(--color-danger); border-color: var(--color-danger-border);">Sign Out</a>
+    {% else %}
+      <a href="/login" class="btn btn-secondary btn-sm">Sign In</a>
+      <a href="/register" class="btn btn-primary btn-sm">Join HelpLink</a>
+    {% endif %}
+  </div>
+</div>
