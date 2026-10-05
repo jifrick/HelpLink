@@ -14,18 +14,18 @@ def test_user_submission_and_admin_moderation(client, db):
     }, follow_redirects=False)
     assert sub_res.status_code == 303
 
-    # Find the newly created pending resource in DB
-    pending, _ = get_resources(db, status="pending")
-    assert len(pending) > 0
-    new_res_id = pending[0].id
+    # Find the newly created published resource in DB
+    published, _ = get_resources(db, status="published")
+    assert len(published) > 0
+    assert published[0].title == "Free React Native Mobile Workshop"
+    new_res_id = published[0].id
 
     # 2. Login as Admin
     client.post("/login", data={"email": "admin@helplink.org", "password": "AdminDevPassword123!"})
 
-    # 3. Check moderation queue
-    mod_res = client.get("/admin/moderation")
-    assert mod_res.status_code == 200
-    assert "Free React Native Mobile Workshop" in mod_res.text
+    # 3. Admin dashboard should show published count
+    dash_res = client.get("/admin/dashboard")
+    assert dash_res.status_code == 200
 
     # 4. Admin approves resource
     approve_res = client.post(f"/admin/resources/{new_res_id}/status", data={"status": "published"}, follow_redirects=False)

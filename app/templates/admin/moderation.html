@@ -22,6 +22,11 @@
                 <span class="badge badge-category">{{ res.category.name if res.category else 'Uncategorized' }}</span>
                 <span class="badge badge-type">{{ res.resource_type }}</span>
                 <span class="badge badge-pending">Status: Pending</span>
+                {% if res.risk_score > 0 %}
+                <span class="badge badge-rejected">Risk Score: {{ res.risk_score }}</span>
+                {% else %}
+                <span class="badge badge-published">Risk Score: {{ res.risk_score }}</span>
+                {% endif %}
               </div>
               <h2 style="font-size: 1.4rem; font-weight: 700; color: var(--color-brand);">{{ res.title }}</h2>
               <div style="font-size: 0.88rem; color: var(--color-text-muted); margin-top: 0.2rem;">

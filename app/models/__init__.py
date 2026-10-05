@@ -5,6 +5,7 @@ from app.models.resource import Resource
 from app.models.tag import Tag, resource_tags
 from app.models.saved_resource import SavedResource
 from app.models.report import Report
+from app.models.gamification import PointTransaction, FraudEvent, ModerationEvent, AdminAuditLog, Badge, UserBadge, Reward, RewardRedemption
 
 __all__ = [
     "Base",

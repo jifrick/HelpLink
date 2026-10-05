@@ -18,7 +18,10 @@ def test_html_sanitization_rules():
     clean_js = sanitize_html(js_link)
     assert "javascript:" not in clean_js
 
-def test_resource_detail_seo_metadata(client):
+def test_resource_detail_seo_metadata(client, db):
+    client.post("/register", data={"full_name": "Submitter", "email": "seo@test.org", "password": "Password123!"})
+    client.post("/submit", data={"title": "National Post-Graduate Scholarship 2026", "category_id": 1, "resource_type": "Course", "location": "Remote", "url": "https://example.org", "description": "This is a valid test resource description with enough length."})
+
     res = client.get("/resources/national-post-graduate-scholarship-2026")
     assert res.status_code == 200
     html = res.text
@@ -28,7 +31,7 @@ def test_resource_detail_seo_metadata(client):
 
     # Resource-specific OpenGraph meta tags
     assert 'content="National Post-Graduate Scholarship 2026 — HelpLink Community Network"' in html
-    assert 'content="The National Scholarship Portal offers financial support' in html
+    assert 'content="This is a valid test resource description' in html
 
     # Accessible external CTA link attributes
     assert 'rel="noopener noreferrer"' in html

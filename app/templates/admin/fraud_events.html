@@ -1,0 +1,61 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Fraud Events — Admin HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">Fraud Events & Security Log</h1>
+      <p style="color: var(--color-text-secondary);">Monitor high-risk submissions and automated account restrictions</p>
+    </div>
+    <a href="/admin/dashboard" class="btn btn-secondary btn-sm">&larr; Back to Dashboard</a>
+  </div>
+
+  {% if events %}
+    <div class="table-responsive">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Event Type</th>
+            <th>Severity / Risk</th>
+            <th>Contributor (ID)</th>
+            <th>Reason</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for event in events %}
+            <tr>
+              <td style="font-weight: 600;">
+                <span class="badge badge-rejected">{{ event.event_type }}</span>
+              </td>
+              <td>
+                <span class="badge {% if event.risk_score > 70 %}badge-rejected{% else %}badge-pending{% endif %}">
+                  {{ event.severity }} ({{ event.risk_score }})
+                </span>
+              </td>
+              <td>
+                <div>{{ event.user.full_name if event.user else 'Unknown' }}</div>
+                <div style="font-size: 0.8rem; color: var(--color-text-muted);">{{ event.user.contributor_id if event.user else '' }}</div>
+              </td>
+              <td>
+                <div style="max-width: 300px; white-space: normal; line-height: 1.4; font-size: 0.9rem;">
+                  {{ event.reason }}
+                </div>
+              </td>
+              <td>{{ event.created_at.strftime('%b %d, %Y %H:%M') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div style="background: var(--color-surface); padding: 4rem 2rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🛡️</div>
+      <h3 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 0.5rem;">No Fraud Events</h3>
+      <p style="color: var(--color-text-secondary);">The community is safe and clean.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

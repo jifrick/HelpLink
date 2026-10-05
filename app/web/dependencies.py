@@ -50,6 +50,11 @@ def require_current_user(current_user: Optional[User] = Depends(get_current_user
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Authentication required"
         )
+    if hasattr(current_user, "account_status") and current_user.account_status == "BANNED":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Your account has been banned due to repeated violations."
+        )
     return current_user
 
 def require_admin_user(current_user: User = Depends(require_current_user)) -> User:

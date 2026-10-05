@@ -8,6 +8,8 @@ from app.models.tag import Tag
 from app.models.saved_resource import SavedResource
 from app.schemas.resource import ResourceCreate, ResourceUpdate
 from app.services.utils import generate_slug, sanitize_html
+from app.services.automated_moderation import process_resource_submission
+from app.models.user import User
 
 def get_unique_slug(db: Session, title: str) -> str:
     base_slug = generate_slug(title)
@@ -25,6 +27,19 @@ def create_resource(db: Session, res_in: ResourceCreate, user_id: Optional[int] 
     cleaned_desc = sanitize_html(res_in.description)
     status = "published" if auto_approve else "pending"
 
+    import urllib.parse
+    def _clean_url(u: str) -> str:
+        try:
+            p = urllib.parse.urlparse(u.strip())
+            q = urllib.parse.parse_qs(p.query)
+            clean_q = {k: v for k, v in q.items() if not k.startswith("utm_")}
+            clean_query = urllib.parse.urlencode(clean_q, doseq=True)
+            return urllib.parse.urlunparse((p.scheme, p.netloc, p.path, p.params, clean_query, ''))
+        except:
+            return u.strip()
+
+    clean_url_val = _clean_url(res_in.url)
+
     resource = Resource(
         title=res_in.title.strip(),
         slug=slug,
@@ -32,7 +47,7 @@ def create_resource(db: Session, res_in: ResourceCreate, user_id: Optional[int] 
         category_id=res_in.category_id,
         resource_type=res_in.resource_type.strip(),
         location=res_in.location.strip() if res_in.location else "Remote",
-        url=res_in.url.strip(),
+        url=clean_url_val,
         contact=res_in.contact.strip() if res_in.contact else None,
         user_id=user_id,
         status=status
@@ -54,6 +69,13 @@ def create_resource(db: Session, res_in: ResourceCreate, user_id: Optional[int] 
     db.add(resource)
     db.commit()
     db.refresh(resource)
+
+    if not auto_approve and user_id:
+        user = db.query(User).filter(User.id == user_id).first()
+        if user:
+            process_resource_submission(db, resource, user)
+            db.refresh(resource)
+
     return resource
 
 def get_resource_by_slug(db: Session, slug: str) -> Optional[Resource]:

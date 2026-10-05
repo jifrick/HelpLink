@@ -23,6 +23,9 @@ class Resource(Base):
     
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
+    
+    # Moderation
+    risk_score: Mapped[int] = mapped_column(default=0, nullable=False)
 
     # Relationships
     category = relationship("Category", back_populates="resources")

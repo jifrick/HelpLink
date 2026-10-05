@@ -3,7 +3,12 @@ from sqlalchemy.orm import Session
 from app.models.user import User
 from app.schemas.user import UserCreate
 from app.core.security import get_password_hash, verify_password
+import random
 
+def generate_contributor_id() -> str:
+    chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    suffix = "".join(random.choices(chars, k=6))
+    return f"HL-{suffix}"
 def get_user_by_email(db: Session, email: str) -> Optional[User]:
     return db.query(User).filter(User.email == email.lower().strip()).first()
 
@@ -17,7 +22,8 @@ def create_user(db: Session, user_in: UserCreate, role: str = "user") -> User:
         full_name=user_in.full_name.strip(),
         password_hash=hashed_pwd,
         role=role,
-        is_active=True
+        is_active=True,
+        contributor_id=generate_contributor_id()
     )
     db.add(user)
     db.commit()
@@ -67,7 +73,8 @@ def sync_oauth_user(
             avatar_url=avatar_url,
             password_hash=None,
             role="user",
-            is_active=True
+            is_active=True,
+            contributor_id=generate_contributor_id()
         )
         db.add(user)
         db.commit()

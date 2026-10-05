@@ -41,7 +41,72 @@ def register_form(
         name="auth/register.html",
         context={"current_user": None, "error": None}
     )
+@router.post("/login", response_class=HTMLResponse)
+def login_submit(
+    request: Request,
+    email: str = Form(...),
+    password: str = Form(...),
+    next: Optional[str] = Form(""),
+    db: Session = Depends(get_db)
+):
+    from app.services.auth_service import authenticate_user
+    user = authenticate_user(db, email, password)
+    if not user:
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/login.html",
+            context={"current_user": None, "error": "Invalid email or password", "next": next},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
 
+    if not user.is_active:
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/login.html",
+            context={"current_user": None, "error": "Your account has been deactivated.", "next": next},
+            status_code=status.HTTP_403_FORBIDDEN
+        )
+
+    target_url = next if next else ("/admin" if user.role == "admin" else "/dashboard")
+    response = RedirectResponse(url=target_url, status_code=status.HTTP_303_SEE_OTHER)
+    token = create_access_token(user.id)
+    response.set_cookie(key="helplink_session", value=token, httponly=True, samesite="lax", max_age=60*60*24*7)
+    return response
+
+@router.post("/register", response_class=HTMLResponse)
+def register_submit(
+    request: Request,
+    full_name: str = Form(...),
+    email: str = Form(...),
+    password: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    from app.services.auth_service import get_user_by_email, create_user
+    from app.schemas.user import UserCreate
+    existing_user = get_user_by_email(db, email)
+    if existing_user:
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/register.html",
+            context={"current_user": None, "error": "Email already exists"},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    try:
+        user_in = UserCreate(email=email, full_name=full_name, password=password)
+    except ValueError as e:
+        return templates.TemplateResponse(
+            request=request,
+            name="auth/register.html",
+            context={"current_user": None, "error": str(e)},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+
+    user = create_user(db, user_in)
+    response = RedirectResponse(url="/dashboard", status_code=status.HTTP_303_SEE_OTHER)
+    token = create_access_token(user.id)
+    response.set_cookie(key="helplink_session", value=token, httponly=True, samesite="lax", max_age=60*60*24*7)
+    return response
 
 @router.get("/auth/google")
 def auth_google(request: Request, next: Optional[str] = None):

@@ -1,4 +1,10 @@
-def test_report_submission_and_resolution(client):
+def test_report_submission_and_resolution(client, db):
+    # Register & Login user
+    client.post("/register", data={"full_name": "Submitter", "email": "sub@test.org", "password": "Password123!"})
+    # Submit resource
+    client.post("/submit", data={"title": "Test Resource", "category_id": 1, "resource_type": "Course", "location": "Remote", "url": "https://example.org", "description": "This is a valid test resource description with enough length."})
+    # Resource should be ID 1
+
     # 1. Submit a user report for resource ID 1
     report_res = client.post(
         "/resources/1/report",
@@ -20,9 +26,12 @@ def test_report_submission_and_resolution(client):
     update_res = client.post("/admin/reports/1/status", data={"status": "reviewed"}, follow_redirects=False)
     assert update_res.status_code == 303
 
-def test_bookmark_saving_toggle(client):
+def test_bookmark_saving_toggle(client, db):
     # Register & Login user
     client.post("/register", data={"full_name": "Bookmarker", "email": "bookmarker@test.org", "password": "Password123!"})
+    
+    # Submit resource
+    client.post("/submit", data={"title": "National Post-Graduate Scholarship 2026", "category_id": 1, "resource_type": "Course", "location": "Remote", "url": "https://example.org", "description": "This is a valid test resource description with enough length."})
 
     # Toggle save on resource ID 1 -> Saved
     save_res = client.post("/resources/1/toggle-save")
@@ -39,7 +48,7 @@ def test_bookmark_saving_toggle(client):
     assert unsave_res.status_code == 200
     assert unsave_res.json()["saved"] is False
 
-def test_guest_cannot_save_resource(client):
+def test_guest_cannot_save_resource(client, db):
     # Unauthenticated guest attempting to save resource -> 401 Unauthorized
     save_res = client.post("/resources/1/toggle-save")
     assert save_res.status_code == 401

@@ -57,6 +57,28 @@ def admin_moderation_queue(
         }
     )
 
+@router.get("/fraud-events", response_class=HTMLResponse)
+def admin_fraud_events(
+    request: Request,
+    db: Session = Depends(get_db),
+    admin_user: User = Depends(require_admin_user)
+):
+    from app.models.gamification import FraudEvent
+    from sqlalchemy.orm import joinedload
+    events = db.query(FraudEvent).options(
+        joinedload(FraudEvent.user),
+        joinedload(FraudEvent.resource)
+    ).order_by(FraudEvent.created_at.desc()).limit(100).all()
+    
+    return templates.TemplateResponse(
+        request=request,
+        name="admin/fraud_events.html",
+        context={
+            "current_user": admin_user,
+            "events": events
+        }
+    )
+
 @router.post("/resources/{resource_id}/status")
 def admin_update_status(
     resource_id: int,
@@ -68,7 +90,7 @@ def admin_update_status(
     if status_val not in ALLOWED_RESOURCE_STATUSES:
         raise HTTPException(status_code=400, detail=f"Invalid resource status provided. Allowed: {', '.join(ALLOWED_RESOURCE_STATUSES)}")
         
-    res = update_resource_status(db, resource_id, status_val)
+    res = update_resource_status(db, resource_id, status_val, admin_user.id)
     if not res:
         raise HTTPException(status_code=404, detail="Resource not found")
     return RedirectResponse(url="/admin/dashboard?updated=true", status_code=status.HTTP_303_SEE_OTHER)

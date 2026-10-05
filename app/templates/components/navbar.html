@@ -21,6 +21,7 @@
       {% if current_user %}
         <a href="/submit" class="btn btn-outline btn-sm">+ Submit Resource</a>
         <a href="/dashboard" class="btn btn-secondary btn-sm">My Dashboard</a>
+        <a href="/rewards" class="nav-link" style="font-size: 0.88rem; font-weight: 600;">🎁 Rewards</a>
         {% if current_user.role == 'admin' %}
           <a href="/admin/dashboard" class="btn btn-primary btn-sm" style="background: var(--color-brand);">⚙️ Admin</a>
         {% endif %}
@@ -50,6 +51,7 @@
     {% if current_user %}
       <a href="/submit" class="btn btn-primary btn-sm">+ Submit Resource</a>
       <a href="/dashboard" class="btn btn-secondary btn-sm">My Dashboard</a>
+      <a href="/rewards" class="btn btn-outline btn-sm">🎁 Rewards Store</a>
       {% if current_user.role == 'admin' %}
         <a href="/admin/dashboard" class="btn btn-outline btn-sm">⚙️ Admin Dashboard</a>
       {% endif %}

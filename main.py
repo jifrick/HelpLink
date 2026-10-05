@@ -11,7 +11,7 @@ from app.core.config import settings
 from app.core.templates import templates, APP_DIR
 from app.db.session import SessionLocal
 from app.db.init_db import init_db
-from app.web import views_public, views_auth, views_user, views_admin
+from app.web import views_public, views_auth, views_user, views_admin, views_gamification
 from app.api.router import api_router
 
 STATIC_DIR = os.path.join(APP_DIR, "static")
@@ -78,6 +78,7 @@ app.include_router(views_public.router)
 app.include_router(views_auth.router)
 app.include_router(views_user.router)
 app.include_router(views_admin.router)
+app.include_router(views_gamification.router)
 
 app.include_router(api_router)
 

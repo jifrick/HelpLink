@@ -1,0 +1,103 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Contributor Rewards — HelpLink{% endblock %}
+
+{% block content %}
+<div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
+
+  {% if redeemed %}
+    <div class="alert alert-success alert-dismissible">
+      🎉 <strong>Reward Claimed!</strong> You have successfully redeemed a reward. Check your redemptions below.
+    </div>
+  {% endif %}
+  
+  {% if error %}
+    <div class="alert alert-error alert-dismissible">
+      ⚠️ <strong>Oops!</strong> {{ error }}
+    </div>
+  {% endif %}
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+    <div>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">Contributor Rewards Store</h1>
+      <p style="color: var(--color-text-secondary);">Redeem your HelpPoints (HP) for exclusive contributor rewards</p>
+    </div>
+    <div style="background: var(--color-surface); border: 2px solid var(--color-primary); border-radius: var(--radius-lg); padding: 1rem 1.5rem; text-align: center;">
+      <div style="font-size: 0.85rem; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 0.05em;">Your Balance</div>
+      <div style="font-size: 1.8rem; font-weight: 800; color: var(--color-primary);">{{ current_user.helppoints_balance }} HP</div>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 3.5rem;">
+    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">Available Rewards</h2>
+    
+    {% if rewards %}
+      <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
+        {% for reward in rewards %}
+          <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+              <h3 style="font-size: 1.15rem; font-weight: 700; color: var(--color-brand); margin: 0;">{{ reward.name }}</h3>
+              <span class="badge badge-published" style="background: var(--color-primary-light); color: var(--color-primary); font-size: 0.9rem; font-weight: 800;">{{ reward.cost_hp }} HP</span>
+            </div>
+            <p style="font-size: 0.9rem; color: var(--color-text-secondary); margin-bottom: 1.5rem; flex-grow: 1;">
+              {{ reward.description }}
+            </p>
+            <form action="/rewards/{{ reward.id }}/redeem" method="POST">
+              {% if current_user.helppoints_balance >= reward.cost_hp %}
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Redeem Reward</button>
+              {% else %}
+                <button type="button" class="btn btn-secondary" style="width: 100%; opacity: 0.6; cursor: not-allowed;" disabled>Need {{ reward.cost_hp - current_user.helppoints_balance }} more HP</button>
+              {% endif %}
+            </form>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="background: var(--color-surface); padding: 3rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+        <p style="color: var(--color-text-secondary);">No rewards are currently available. Check back soon!</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div>
+    <h2 style="font-size: 1.35rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem;">My Redemptions</h2>
+    {% if redemptions %}
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Reward</th>
+              <th>Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in redemptions %}
+              <tr>
+                <td style="font-family: monospace; font-size: 0.9rem;">{{ r.redemption_id }}</td>
+                <td style="font-weight: 600;">{{ r.reward.name }}</td>
+                <td>{{ r.created_at.strftime('%b %d, %Y') }}</td>
+                <td>
+                  {% if r.status == 'FULFILLED' %}
+                    <span class="badge badge-published">Fulfilled</span>
+                  {% elif r.status == 'PENDING' %}
+                    <span class="badge badge-pending">Pending</span>
+                  {% else %}
+                    <span class="badge badge-rejected">{{ r.status }}</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div style="background: var(--color-surface); padding: 2.5rem; text-align: center; border-radius: var(--radius-lg); border: 1px solid var(--color-border);">
+        <p style="color: var(--color-text-secondary);">You haven't redeemed any rewards yet.</p>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

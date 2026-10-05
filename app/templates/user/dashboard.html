@@ -6,20 +6,28 @@
 <div class="container" style="padding-top: 2.5rem; padding-bottom: 4rem;">
 
   {% if submitted %}
-    <div class="alert alert-success alert-dismissible">
-      🎉 <strong>Thank you for contributing!</strong> Your resource has been submitted.
+    <div class="alert {% if submitted_status == 'rejected' %}alert-error{% elif submitted_status == 'pending' %}alert-warning{% else %}alert-success{% endif %} alert-dismissible">
       {% if submitted_status == 'pending' %}
-        It is currently in moderation review and will appear publicly once approved.
+        ⏳ <strong>In Review:</strong> Your resource needs a quick additional review before it can be published.
+      {% elif submitted_status == 'rejected' %}
+        ❌ <strong>Not Approved:</strong> We couldn't publish this resource because it didn't pass our safety and quality checks.
       {% else %}
-        It has been published directly to the public directory.
+        🎉 <strong>Success!</strong> Your resource was reviewed automatically and published.
       {% endif %}
     </div>
   {% endif %}
 
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand);">Welcome, {{ current_user.full_name }}</h1>
-      <p style="color: var(--color-text-secondary);">Manage your submitted opportunities and saved bookmarks</p>
+      <h1 style="font-size: 2rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem;">Welcome, {{ current_user.full_name }}</h1>
+      <div style="display: flex; gap: 1rem; align-items: center; color: var(--color-text-secondary); font-size: 0.9rem;">
+        <span style="background: var(--color-surface-hover); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600;">ID: {{ current_user.contributor_id }}</span>
+        <span><strong style="color: var(--color-primary);">{{ current_user.helppoints_balance }} HP</strong></span>
+        <span><span class="badge badge-published">{{ current_user.level }}</span></span>
+        {% if current_user.account_status != 'ACTIVE' %}
+          <span class="badge badge-rejected">{{ current_user.account_status }}</span>
+        {% endif %}
+      </div>
     </div>
     <a href="/submit" class="btn btn-primary">+ Submit New Resource</a>
   </div>
