@@ -67,10 +67,23 @@ async def general_exception_handler(request: Request, exc: Exception):
             status_code=500,
             content={"detail": "Internal server error"}
         )
+    import os
+    try:
+        from app.core.templates import APP_DIR
+        templates_path = os.path.join(APP_DIR, "templates")
+        listing = f"Templates path: {templates_path}\n"
+        if os.path.exists(templates_path):
+            for root, dirs, files in os.walk(templates_path):
+                listing += f"\n{root}:\n  Dirs: {dirs}\n  Files: {files}"
+        else:
+            listing += "PATH DOES NOT EXIST!"
+    except Exception as list_e:
+        listing = f"Failed to list: {list_e}"
+
     return templates.TemplateResponse(
         request=request,
         name="errors/500.html",
-        context={"current_user": None, "exc_msg": str(exc)},
+        context={"current_user": None, "exc_msg": f"{str(exc)}\n\n--- FS LISTING ---\n{listing}"},
         status_code=500
     )
 
