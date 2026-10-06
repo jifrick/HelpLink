@@ -1,28 +1,153 @@
 {% extends "layouts/base.html" %}
 
-{% block title %}Contributor Rewards — HelpLink{% endblock %}
+{% block title %}Rewards & Achievements — HelpLink{% endblock %}
 
 {% block content %}
 <div class="container" style="padding-top: 3rem; padding-bottom: 5rem;">
 
   <div class="flex items-center justify-between mb-8 gap-4 flex-wrap">
     <div>
-      <h1 class="text-2xl font-extrabold text-brand mb-2">Rewards Marketplace</h1>
-      <p class="text-secondary text-base">Use your HelpPoints to unlock exclusive community rewards.</p>
+      <h1 class="text-2xl font-extrabold text-brand mb-2">Rewards & Achievements</h1>
+      <p class="text-secondary text-base">Contribute to the community, unlock milestones, and earn exclusive badges.</p>
     </div>
     
-    <div class="card flex flex-col justify-center items-center py-4 px-6 border-2 border-primary-light bg-surface-elevated">
-      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Your Balance</div>
-      <div class="text-2xl font-extrabold text-primary tabular-nums"><span id="user-balance">{{ current_user.helppoints_balance }}</span> <span class="text-base font-semibold">HP</span></div>
+    <div class="card flex flex-row gap-8 items-center py-5 px-8 border border-border bg-surface shadow-sm rounded-xl">
+      <div class="flex flex-col items-center">
+        <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Current Balance</div>
+        <div class="text-2xl font-extrabold text-primary tabular-nums"><span id="user-balance">{{ current_user.helppoints_balance }}</span> <span class="text-base font-semibold">HP</span></div>
+      </div>
+      <div class="w-px h-10 bg-border"></div>
+      <div class="flex flex-col items-center">
+        <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Lifetime Earned</div>
+        <div class="text-2xl font-extrabold text-brand tabular-nums"><span>{{ current_user.lifetime_helppoints }}</span> <span class="text-base font-semibold">HP</span></div>
+      </div>
     </div>
   </div>
 
+  {% if next_milestone %}
+  <div class="bg-surface border border-border p-5 rounded-xl shadow-sm mb-12">
+    <div class="flex justify-between items-center mb-2">
+      <span class="text-sm font-bold text-muted uppercase tracking-wider">Next Milestone: {{ next_milestone.milestone_threshold }} HP</span>
+      <span class="text-sm font-semibold text-primary">
+        {% set progress = (current_user.lifetime_helppoints / next_milestone.milestone_threshold) * 100 %}
+        {% if progress > 100 %}{% set progress = 100 %}{% endif %}
+        {{ progress|int }}%
+      </span>
+    </div>
+    <div class="w-full bg-border rounded-full h-3 mb-3">
+      <div class="bg-primary h-3 rounded-full" style="width: {{ progress }}%"></div>
+    </div>
+    <div class="text-sm text-secondary font-medium">Unlock: <strong class="text-brand">{{ next_milestone.name }}</strong></div>
+  </div>
+  {% else %}
+  <div class="bg-success-soft border border-success-light p-5 rounded-xl mb-12">
+    <div class="flex items-center text-success">
+      <i data-lucide="award" class="w-6 h-6 mr-3"></i>
+      <div class="font-bold">You've unlocked all current milestone rewards! More coming soon.</div>
+    </div>
+  </div>
+  {% endif %}
+
   <div class="mb-12">
-    <h2 class="text-lg font-bold text-brand mb-4">Available Rewards</h2>
+    <h2 class="text-xl font-extrabold text-brand mb-6 flex items-center border-b border-border pb-2">
+      <i data-lucide="gift" class="w-5 h-5 mr-2 text-primary"></i> Milestone Rewards
+    </h2>
+    <p class="text-sm text-secondary mb-6">These are unlocked automatically based on your lifetime HelpPoints. You never spend points to unlock these.</p>
     
-    {% if rewards %}
+    {% if milestones %}
+      <div class="flex flex-col gap-4">
+        {% for reward in milestones %}
+          <div class="flex flex-row p-5 bg-surface border border-border rounded-xl shadow-sm items-center transition-base hover:shadow-md">
+            
+            <div class="w-16 h-16 mr-6 rounded-lg overflow-hidden border border-border bg-surface-elevated flex items-center justify-center flex-shrink-0">
+              {% if reward.thumbnail %}
+                <img src="/{{ reward.thumbnail }}" alt="{{ reward.name }}" class="w-full h-full object-cover">
+              {% else %}
+                <i data-lucide="package" class="w-8 h-8 text-muted"></i>
+              {% endif %}
+            </div>
+            
+            <div class="flex-grow">
+              <h3 class="text-lg font-bold text-brand m-0 flex items-center">
+                {{ reward.name }}
+                {% if reward.id in owned_reward_ids %}
+                  <span class="ml-3 text-xs bg-success-soft text-success px-2 py-0.5 rounded-full font-bold flex items-center">
+                    <i data-lucide="check" class="w-3 h-3 mr-1"></i> UNLOCKED
+                  </span>
+                {% else %}
+                  <span class="ml-3 text-xs bg-surface-elevated text-muted border border-border px-2 py-0.5 rounded-full font-bold flex items-center">
+                    <i data-lucide="lock" class="w-3 h-3 mr-1"></i> LOCKED
+                  </span>
+                {% endif %}
+              </h3>
+              <p class="text-sm text-secondary mt-1">{{ reward.description }}</p>
+            </div>
+            
+            <div class="flex flex-col items-end flex-shrink-0 ml-4">
+              <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">{{ reward.milestone_threshold }} HP REQUIRED</div>
+              {% if reward.id in owned_reward_ids %}
+                <a href="/rewards/{{ reward.id }}/download" class="btn btn-outline btn-sm font-semibold" download>
+                  <i data-lucide="download" class="w-4 h-4 mr-1.5"></i> Download
+                </a>
+              {% else %}
+                <div class="text-sm font-semibold text-secondary tabular-nums">
+                  {{ current_user.lifetime_helppoints }} / {{ reward.milestone_threshold }} HP
+                </div>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p class="empty-state-desc">No milestone rewards configured.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="mb-12">
+    <h2 class="text-xl font-extrabold text-brand mb-6 flex items-center border-b border-border pb-2">
+      <i data-lucide="award" class="w-5 h-5 mr-2 text-warning"></i> Badges
+    </h2>
+    <p class="text-sm text-secondary mb-6">Earned automatically for contributing approved resources and reaching new levels.</p>
+    
+    {% if all_badges %}
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {% for badge in all_badges %}
+          <div class="flex flex-row p-4 bg-surface border {% if badge.id in owned_badge_ids %}border-primary-light bg-primary-soft/10{% else %}border-border{% endif %} rounded-xl shadow-sm items-center transition-base">
+            <div class="w-12 h-12 rounded-full flex items-center justify-center mr-4 {% if badge.id in owned_badge_ids %}bg-primary text-bg{% else %}bg-surface-elevated text-muted border border-border{% endif %}">
+              <i data-lucide="{{ badge.icon }}" class="w-6 h-6"></i>
+            </div>
+            <div class="flex-grow">
+              <div class="flex justify-between items-start">
+                <h3 class="text-base font-bold {% if badge.id in owned_badge_ids %}text-brand{% else %}text-muted{% endif %} m-0">{{ badge.name }}</h3>
+                {% if badge.id in owned_badge_ids %}
+                  <i data-lucide="check-circle" class="w-4 h-4 text-success flex-shrink-0"></i>
+                {% else %}
+                  <i data-lucide="lock" class="w-4 h-4 text-muted flex-shrink-0"></i>
+                {% endif %}
+              </div>
+              <p class="text-xs {% if badge.id in owned_badge_ids %}text-secondary{% else %}text-muted{% endif %} mt-1">{{ badge.description }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state p-4">
+        <p class="empty-state-desc">No badges currently available.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="mb-12">
+    <h2 class="text-xl font-extrabold text-brand mb-6 flex items-center border-b border-border pb-2">
+      <i data-lucide="shopping-bag" class="w-5 h-5 mr-2 text-primary"></i> Redeemable Rewards
+    </h2>
+    <p class="text-sm text-secondary mb-6">Special items you can purchase by spending your current HelpPoints balance.</p>
+    
+    {% if redeemable_rewards %}
       <div class="resources-grid" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
-        {% for reward in rewards %}
+        {% for reward in redeemable_rewards %}
           <div class="reward-card relative flex flex-col p-5 bg-surface border border-border rounded-xl shadow-sm transition-base hover:shadow-md">
             
             {% if reward.status == 'COMING_SOON' %}
@@ -52,7 +177,7 @@
                 </div>
               {% elif reward.status == 'READY' %}
                 {% if current_user.helppoints_balance >= reward.cost_hp %}
-                  <button type="button" class="btn btn-primary w-full" onclick="openModal('{{ reward.id }}', '{{ reward.name | escape }}', '{{ reward.cost_hp }}')">Redeem Reward</button>
+                  <button type="button" class="btn btn-primary w-full" onclick="openModal('{{ reward.id }}', '{{ reward.name | escape }}', '{{ reward.cost_hp }}')">Redeem for {{ reward.cost_hp }} HP</button>
                 {% else %}
                   <button type="button" class="btn btn-secondary w-full" disabled>Need {{ reward.cost_hp - current_user.helppoints_balance }} more HP</button>
                 {% endif %}
@@ -66,64 +191,11 @@
         {% endfor %}
       </div>
     {% else %}
-      <div class="empty-state">
-        <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="package" class="w-12 h-12"></i></div>
-        <h3 class="empty-state-title">No Rewards Available</h3>
-        <p class="empty-state-desc">We're working on stocking the store. Check back soon!</p>
+      <div class="empty-state p-6">
+        <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="package" class="w-10 h-10"></i></div>
+        <p class="empty-state-desc">No redeemable rewards currently available. Check back soon!</p>
       </div>
     {% endif %}
-  </div>
-
-  <div>
-    <h2 class="text-lg font-bold text-brand mb-4">My Redemptions</h2>
-    <div id="redemptions-container">
-      {% if redemptions %}
-        <div class="table-responsive">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Reward</th>
-                <th>Date</th>
-                <th>Status</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for r in redemptions %}
-                <tr class="transition-base hover:bg-surface-hover">
-                  <td class="text-sm text-muted" style="font-family: var(--font-mono);">{{ r.redemption_id[:8] }}...</td>
-                  <td class="font-semibold text-brand">{{ r.reward.name }}</td>
-                  <td class="tabular-nums text-sm">{{ r.created_at.strftime('%b %d, %Y') }}</td>
-                  <td>
-                    {% if r.status == 'FULFILLED' %}
-                      <span class="badge badge-published">Fulfilled</span>
-                    {% elif r.status == 'PENDING' %}
-                      <span class="badge badge-pending">Pending</span>
-                    {% else %}
-                      <span class="badge badge-rejected">{{ r.status|capitalize }}</span>
-                    {% endif %}
-                  </td>
-                  <td>
-                    {% if r.status == 'FULFILLED' and r.reward.reward_type == 'DIGITAL_DOWNLOAD' %}
-                      <a href="/rewards/{{ r.reward.id }}/download" class="text-primary hover:text-primary-hover text-sm font-medium flex items-center" download>
-                        <i data-lucide="download" class="w-4 h-4 mr-1"></i> Download
-                      </a>
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      {% else %}
-        <div class="empty-state" id="no-redemptions">
-          <div class="empty-state-icon flex justify-center text-muted mb-4"><i data-lucide="ticket" class="w-12 h-12"></i></div>
-          <h3 class="empty-state-title">No Redemptions Yet</h3>
-          <p class="empty-state-desc">Use your HelpPoints to unlock community rewards.</p>
-        </div>
-      {% endif %}
-    </div>
   </div>
 
 </div>
@@ -133,11 +205,11 @@
   <div class="modal-content relative" id="modal-content-area">
     <div id="modal-default-view">
       <div class="flex items-center justify-center mb-4 text-4xl text-primary opacity-90">
-        <i data-lucide="package" class="w-12 h-12"></i>
+        <i data-lucide="shopping-cart" class="w-12 h-12"></i>
       </div>
       
       <h3 class="text-xl font-bold text-center text-brand mb-2">Confirm Redemption</h3>
-      <p class="text-center text-secondary mb-6">Are you sure you want to redeem "<strong id="modalRewardName" class="text-brand"></strong>"?</p>
+      <p class="text-center text-secondary mb-6">Are you sure you want to spend points to redeem "<strong id="modalRewardName" class="text-brand"></strong>"?</p>
       
       <div id="modal-error-container"></div>
       
@@ -238,12 +310,10 @@
       const data = await response.json();
       
       if (response.ok && data.success) {
-        // Show success view
         document.getElementById('modal-default-view').classList.add('hidden');
         document.getElementById('modal-success-view').classList.remove('hidden');
         lucide.createIcons();
       } else {
-        // Show error
         document.getElementById('modal-error-container').innerHTML = `
           <div class="alert alert-error mb-4">
             <i data-lucide="alert-triangle" class="w-4 h-4 inline-block align-text-bottom mr-1 text-danger"></i> 
@@ -271,5 +341,64 @@
       cancelBtn.classList.remove('pointer-events-none', 'opacity-50');
     }
   });
+
+  // Milestone Celebration Logic
+  document.addEventListener('DOMContentLoaded', function() {
+    const ownedMilestoneIds = {{ owned_reward_ids | tojson | safe }};
+    const storedMilestonesKey = 'helplink_seen_milestones_' + {{ current_user.id }};
+    
+    let seenMilestones = [];
+    try {
+      const stored = localStorage.getItem(storedMilestonesKey);
+      if (stored) seenMilestones = JSON.parse(stored);
+    } catch (e) {}
+
+    const newMilestones = ownedMilestoneIds.filter(id => !seenMilestones.includes(id));
+    
+    if (newMilestones.length > 0) {
+      // Find the names of newly unlocked milestones from the DOM
+      // We can just show a generic message or find the highest one.
+      
+      // Update local storage
+      localStorage.setItem(storedMilestonesKey, JSON.stringify(ownedMilestoneIds));
+      
+      // Show toast
+      showMilestoneToast(newMilestones.length);
+    }
+  });
+  
+  function showMilestoneToast(count) {
+    const toast = document.createElement('div');
+    toast.className = 'fixed bottom-4 right-4 bg-surface-elevated border border-primary-light shadow-xl rounded-xl p-4 flex items-start gap-4 transform translate-y-full opacity-0 transition-all duration-500 ease-out z-50 max-w-sm';
+    
+    toast.innerHTML = `
+      <div class="flex-shrink-0 w-10 h-10 rounded-full bg-primary-soft flex items-center justify-center text-primary mt-0.5">
+        <i data-lucide="award" class="w-5 h-5"></i>
+      </div>
+      <div class="flex-grow">
+        <h4 class="text-sm font-bold text-brand m-0 mb-1">Milestone Unlocked!</h4>
+        <p class="text-xs text-secondary m-0">You've unlocked ${count > 1 ? count + ' new rewards' : 'a new reward'}. Thank you for your contributions!</p>
+      </div>
+      <button class="flex-shrink-0 text-muted hover:text-secondary transition-colors" onclick="this.parentElement.remove()">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    `;
+    
+    document.body.appendChild(toast);
+    lucide.createIcons();
+    
+    // Animate in
+    requestAnimationFrame(() => {
+      toast.classList.remove('translate-y-full', 'opacity-0');
+    });
+    
+    // Auto dismiss after 6 seconds
+    setTimeout(() => {
+      if (toast.parentElement) {
+        toast.classList.add('translate-y-full', 'opacity-0');
+        setTimeout(() => toast.remove(), 500);
+      }
+    }, 6000);
+  }
 </script>
 {% endblock %}

@@ -99,7 +99,15 @@ def award_points(db: Session, user_id: int, amount: int, tx_type: str, ref_type:
     db.add(tx)
     
     user.helppoints_balance += amount
-    recalculate_user_level(db, user)
+    user.lifetime_helppoints += amount
+    
+    level_changed = recalculate_user_level(db, user)
+    
+    from app.services.gamification_service import evaluate_milestones, evaluate_level_badge
+    evaluate_milestones(db, user)
+    
+    if level_changed:
+        evaluate_level_badge(db, user)
     
     db.commit()
 

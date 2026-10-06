@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.core.templates import templates
 from app.db.session import get_db
-from app.models.gamification import Reward, RewardRedemption
+from app.models.gamification import Reward, RewardRedemption, Badge, UserBadge
 from app.models.user import User
 from app.web.dependencies import require_current_user, validate_csrf_and_origin
 from app.services.points_service import deduct_points
@@ -20,21 +20,39 @@ def rewards_store(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_current_user)
 ):
-    # Fetch active and visible rewards
-    rewards = db.query(Reward).filter(Reward.status.in_(["READY", "COMING_SOON", "UNAVAILABLE"]), Reward.is_active == True).order_by(Reward.cost_hp).all()
+    # Fetch milestones
+    milestones = db.query(Reward).filter(Reward.is_milestone == True, Reward.status.in_(["READY", "COMING_SOON", "UNAVAILABLE"]), Reward.is_active == True).order_by(Reward.milestone_threshold).all()
+    # Fetch redeemable rewards
+    redeemable = db.query(Reward).filter(Reward.is_milestone == False, Reward.status.in_(["READY", "COMING_SOON", "UNAVAILABLE"]), Reward.is_active == True).order_by(Reward.cost_hp).all()
+    
     # Fetch user redemptions
     redemptions = db.query(RewardRedemption).filter(RewardRedemption.user_id == current_user.id).order_by(RewardRedemption.created_at.desc()).all()
-    
     owned_reward_ids = [r.reward_id for r in redemptions]
+    
+    # Fetch badges
+    all_badges = db.query(Badge).order_by(Badge.id).all()
+    user_badges_recs = db.query(UserBadge).filter(UserBadge.user_id == current_user.id).all()
+    owned_badge_ids = [ub.badge_id for ub in user_badges_recs]
+
+    # Find next milestone
+    next_milestone = None
+    for m in milestones:
+        if m.milestone_threshold is not None and current_user.lifetime_helppoints < m.milestone_threshold:
+            next_milestone = m
+            break
 
     return templates.TemplateResponse(
         request=request,
         name="user/rewards.html",
         context={
             "current_user": current_user,
-            "rewards": rewards,
+            "milestones": milestones,
+            "redeemable_rewards": redeemable,
             "redemptions": redemptions,
-            "owned_reward_ids": owned_reward_ids
+            "owned_reward_ids": owned_reward_ids,
+            "all_badges": all_badges,
+            "owned_badge_ids": owned_badge_ids,
+            "next_milestone": next_milestone
         }
     )
 

@@ -39,6 +39,14 @@ def update_resource_status(db: Session, resource_id: int, status: str, admin_use
         from app.models.gamification import AdminAuditLog
         award_points(db, res.user_id, HP_APPROVED_RESOURCE, "RESOURCE_APPROVED", "resource", str(res.id), f"Resource published: {res.title}")
         
+        # Evaluate resource badges
+        from app.services.gamification_service import evaluate_resource_badges
+        from app.models.user import User
+        user = db.query(User).filter(User.id == res.user_id).first()
+        approved_count = db.query(Resource).filter(Resource.user_id == res.user_id, Resource.status == "published").count()
+        if user:
+            evaluate_resource_badges(db, user, approved_count)
+        
     elif old_status == "published" and status != "published":
         from app.services.points_service import deduct_points, HP_APPROVED_RESOURCE
         from app.models.gamification import AdminAuditLog

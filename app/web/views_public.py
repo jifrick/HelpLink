@@ -155,7 +155,7 @@ def public_profile(
     current_user: Optional[User] = Depends(get_current_user_from_cookie)
 ):
     from sqlalchemy.orm import joinedload
-    from app.models.gamification import UserBadge
+    from app.models.gamification import UserBadge, Badge
     from app.models.resource import Resource
     
     target_user = db.query(User).filter(User.contributor_id == contributor_id).first()
@@ -163,8 +163,19 @@ def public_profile(
         raise HTTPException(status_code=404, detail="Contributor not found")
         
     user_badges = db.query(UserBadge).options(joinedload(UserBadge.badge)).filter(UserBadge.user_id == target_user.id).order_by(UserBadge.awarded_at.desc()).all()
+    owned_badge_ids = [ub.badge_id for ub in user_badges]
+    
+    # Get all contribution badges ordered by threshold
+    all_contribution_badges = db.query(Badge).filter(Badge.criteria_type == "RESOURCE_COUNT").order_by(Badge.threshold.asc()).all()
+    
     public_contributions = db.query(Resource).filter(Resource.user_id == target_user.id, Resource.status == "published").order_by(Resource.created_at.desc()).limit(10).all()
     contribution_count = db.query(Resource).filter(Resource.user_id == target_user.id, Resource.status == "published").count()
+
+    next_badge = None
+    for b in all_contribution_badges:
+        if contribution_count < b.threshold:
+            next_badge = b
+            break
 
     return templates.TemplateResponse(
         request=request,
@@ -173,8 +184,11 @@ def public_profile(
             "current_user": current_user,
             "profile_user": target_user,
             "user_badges": user_badges,
+            "owned_badge_ids": owned_badge_ids,
+            "all_contribution_badges": all_contribution_badges,
             "public_contributions": public_contributions,
-            "contribution_count": contribution_count
+            "contribution_count": contribution_count,
+            "next_badge": next_badge
         }
     )
 

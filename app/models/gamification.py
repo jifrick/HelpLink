@@ -98,6 +98,8 @@ class Reward(Base):
     inventory: Mapped[int] = mapped_column(nullable=True)
     redemption_limit: Mapped[int] = mapped_column(default=1, nullable=False)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_milestone: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    milestone_threshold: Mapped[int] = mapped_column(nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now(), nullable=False)
 

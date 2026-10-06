@@ -20,6 +20,7 @@ class User(Base):
     # Gamification & Moderation fields
     contributor_id: Mapped[Optional[str]] = mapped_column(String(20), unique=True, index=True, nullable=True)
     helppoints_balance: Mapped[int] = mapped_column(default=0, nullable=False)
+    lifetime_helppoints: Mapped[int] = mapped_column(default=0, nullable=False)
     level: Mapped[str] = mapped_column(String(50), default="New Contributor", nullable=False)
     trust_score: Mapped[int] = mapped_column(default=50, nullable=False)  # 0-100, 50 is neutral
     fraud_risk_score: Mapped[int] = mapped_column(default=0, nullable=False) # 0-100, 0 is no risk

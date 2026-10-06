@@ -3,92 +3,159 @@
 {% block title %}{{ profile_user.full_name }} — Contributor Profile{% endblock %}
 
 {% block content %}
-<div class="container" style="padding-top: 3rem; padding-bottom: 5rem; max-width: 900px;">
+<div class="container py-12 pb-20 max-w-5xl">
   
   <!-- Profile Header -->
-  <div style="background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 3rem 2rem; margin-bottom: 2rem; text-align: center; box-shadow: var(--shadow-sm);">
+  <div class="bg-surface border border-border rounded-xl p-8 md:p-12 mb-8 text-center shadow-sm relative overflow-hidden">
+    <!-- Subtle gradient background accent -->
+    <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-primary via-primary-light to-brand"></div>
     
-    <div style="width: 100px; height: 100px; background: var(--color-primary); color: white; border-radius: var(--radius-full); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; margin: 0 auto 1.5rem auto;">
+    <div class="w-24 h-24 bg-primary text-white rounded-full flex items-center justify-center text-4xl font-extrabold mx-auto mb-6 shadow-md border-4 border-surface">
       {{ profile_user.full_name[:1] | upper }}
     </div>
     
-    <h1 style="font-size: 2.25rem; font-weight: 800; color: var(--color-brand); margin-bottom: 0.5rem; display: flex; justify-content: center; align-items: center; gap: 0.5rem;">
+    <h1 class="text-3xl font-extrabold text-brand mb-2 flex justify-center items-center gap-3 flex-wrap">
       {{ profile_user.full_name }}
       {% if profile_user.trust_score > 70 %}
-      <span style="font-size: 0.9rem; background: var(--color-success); color: white; padding: 0.1rem 0.5rem; border-radius: var(--radius-full); font-weight: 600;" title="Trusted Contributor">✓ Trusted</span>
+      <span class="text-xs bg-success text-white px-2.5 py-0.5 rounded-full font-bold shadow-sm inline-flex items-center" title="Trusted Contributor">
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 mr-1"></i> Trusted
+      </span>
       {% endif %}
     </h1>
     
-    <div style="color: var(--color-text-secondary); font-size: 1rem; margin-bottom: 1.5rem;">
-      Contributor ID: <span style="font-family: monospace; font-weight: 600; color: var(--color-text);">{{ profile_user.contributor_id }}</span>
-      <span style="margin: 0 0.5rem;">•</span>
-      Joined {{ profile_user.created_at.strftime('%b %Y') }}
+    <div class="text-secondary text-base mb-8 flex items-center justify-center flex-wrap gap-2">
+      <span class="font-mono font-semibold text-text uppercase tracking-wider text-sm bg-bg px-2 py-1 rounded border border-border">ID: {{ profile_user.contributor_id }}</span>
+      <span class="text-border hidden sm:inline">•</span>
+      <span>Joined {{ profile_user.created_at.strftime('%b %Y') }}</span>
     </div>
     
-    <div style="display: flex; justify-content: center; gap: 2rem; color: var(--color-brand); font-weight: 700; flex-wrap: wrap;">
-      <div>
-        <div style="font-size: 1.75rem;">{{ profile_user.level }}</div>
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.05em;">Current Level</div>
+    <div class="flex justify-center gap-6 md:gap-12 text-brand font-bold flex-wrap">
+      <div class="flex flex-col items-center">
+        <div class="text-3xl text-primary">{{ profile_user.level }}</div>
+        <div class="text-xs uppercase text-muted tracking-widest mt-1">Current Level</div>
       </div>
-      <div>
-        <div style="font-size: 1.75rem;">{{ contribution_count }}</div>
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.05em;">Public Contributions</div>
+      <div class="w-px bg-border hidden md:block"></div>
+      <div class="flex flex-col items-center">
+        <div class="text-3xl tabular-nums">{{ profile_user.helppoints_balance }} <span class="text-lg">HP</span></div>
+        <div class="text-xs uppercase text-muted tracking-widest mt-1">Current Balance</div>
       </div>
-      <div>
-        <div style="font-size: 1.75rem;">{{ user_badges|length }}</div>
-        <div style="font-size: 0.85rem; text-transform: uppercase; color: var(--color-text-secondary); letter-spacing: 0.05em;">Earned Badges</div>
+      <div class="w-px bg-border hidden md:block"></div>
+      <div class="flex flex-col items-center">
+        <div class="text-3xl tabular-nums text-brand">{{ profile_user.lifetime_helppoints }} <span class="text-lg">HP</span></div>
+        <div class="text-xs uppercase text-muted tracking-widest mt-1">Lifetime Earned</div>
       </div>
     </div>
-    
   </div>
 
-  <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 2rem;">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     
-    <!-- Badges Showcase -->
-    <div>
-      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Earned Badges</h2>
+    <!-- Left Column: Badges & Progress -->
+    <div class="lg:col-span-1 space-y-8">
       
-      {% if user_badges %}
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 1rem;">
-          {% for ub in user_badges %}
-          <div style="background: var(--color-surface); border: 1px solid var(--color-border); padding: 1rem; border-radius: var(--radius-md); text-align: center;" title="{{ ub.badge.description }}">
-            <div style="font-size: 2rem; margin-bottom: 0.5rem;">{{ ub.badge.icon }}</div>
-            <div style="font-size: 0.8rem; font-weight: 700; line-height: 1.2;">{{ ub.badge.name }}</div>
+      <!-- Contributor Progression -->
+      <div class="bg-surface border border-border rounded-xl p-6 shadow-sm">
+        <h2 class="text-lg font-extrabold text-brand mb-4 flex items-center">
+          <i data-lucide="trending-up" class="w-5 h-5 mr-2 text-primary"></i> Progression
+        </h2>
+        
+        <div class="mb-4">
+          <div class="flex justify-between text-sm font-semibold mb-1">
+            <span class="text-secondary">Approved Contributions</span>
+            <span class="text-brand tabular-nums">{{ contribution_count }}</span>
           </div>
-          {% endfor %}
         </div>
-      {% else %}
-        <div style="padding: 1.5rem; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); text-align: center; color: var(--color-text-secondary); font-size: 0.95rem;">
-          No badges earned yet.
+
+        {% if next_badge %}
+        <div class="pt-4 border-t border-border mt-2">
+          <div class="flex justify-between text-xs font-bold uppercase tracking-wider text-muted mb-2">
+            <span>Next Achievement</span>
+            <span class="text-primary">{{ contribution_count }} / {{ next_badge.threshold }}</span>
+          </div>
+          
+          <div class="w-full bg-border rounded-full h-2.5 mb-3">
+            {% set progress = (contribution_count / next_badge.threshold) * 100 %}
+            <div class="bg-primary h-2.5 rounded-full" style="width: {{ progress }}%"></div>
+          </div>
+          <div class="text-sm font-semibold text-brand flex items-center">
+            <i data-lucide="{{ next_badge.icon }}" class="w-4 h-4 mr-1.5 text-muted"></i>
+            {{ next_badge.name }}
+          </div>
+          <p class="text-xs text-secondary mt-1">{{ next_badge.threshold - contribution_count }} more approved contributions to unlock.</p>
         </div>
-      {% endif %}
+        {% else %}
+        <div class="pt-4 border-t border-border mt-2 text-center">
+          <i data-lucide="award" class="w-8 h-8 text-warning mx-auto mb-2 opacity-80"></i>
+          <p class="text-sm font-bold text-success">Legendary Contributor</p>
+          <p class="text-xs text-secondary mt-1">You've reached the highest contribution tier!</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Community Achievements -->
+      <div class="bg-surface border border-border rounded-xl p-6 shadow-sm">
+        <div class="flex justify-between items-end mb-4">
+          <h2 class="text-lg font-extrabold text-brand flex items-center m-0">
+            <i data-lucide="award" class="w-5 h-5 mr-2 text-warning"></i> Achievements
+          </h2>
+          <span class="text-xs font-bold text-muted bg-bg px-2 py-0.5 rounded-md border border-border">{{ owned_badge_ids|length }} Earned</span>
+        </div>
+        
+        {% if all_contribution_badges %}
+          <div class="flex flex-col gap-3">
+            {% for badge in all_contribution_badges %}
+            {% set is_earned = badge.id in owned_badge_ids %}
+            <div class="flex items-center p-3 rounded-lg border {% if is_earned %}border-primary-light bg-primary-soft/10{% else %}border-border bg-bg{% endif %} transition-base">
+              <div class="w-10 h-10 rounded-full flex items-center justify-center mr-3 flex-shrink-0 {% if is_earned %}bg-primary text-white shadow-sm{% else %}bg-surface-elevated text-muted border border-border{% endif %}">
+                <i data-lucide="{{ badge.icon }}" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-grow min-w-0">
+                <div class="flex justify-between items-center">
+                  <h3 class="text-sm font-bold truncate {% if is_earned %}text-brand{% else %}text-muted{% endif %}">{{ badge.name }}</h3>
+                  {% if is_earned %}
+                    <i data-lucide="check-circle" class="w-3.5 h-3.5 text-success flex-shrink-0 ml-1"></i>
+                  {% else %}
+                    <i data-lucide="lock" class="w-3 h-3 text-muted flex-shrink-0 ml-1 opacity-70"></i>
+                  {% endif %}
+                </div>
+                <p class="text-xs mt-0.5 truncate {% if is_earned %}text-secondary{% else %}text-muted{% endif %}">
+                  {{ badge.threshold }} resource{% if badge.threshold != 1 %}s{% endif %}
+                </p>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="p-4 bg-bg border border-border rounded-md text-center text-secondary text-sm">
+            No achievement data available.
+          </div>
+        {% endif %}
+      </div>
+      
     </div>
     
-    <!-- Recent Contributions -->
-    <div>
-      <h2 style="font-size: 1.25rem; font-weight: 700; color: var(--color-brand); margin-bottom: 1rem; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem;">Recent Contributions</h2>
+    <!-- Right Column: Recent Contributions -->
+    <div class="lg:col-span-2">
+      <div class="flex justify-between items-end mb-6 border-b border-border pb-3">
+        <h2 class="text-xl font-extrabold text-brand flex items-center m-0">
+          <i data-lucide="folder-open" class="w-5 h-5 mr-2 text-primary"></i> Public Contributions
+        </h2>
+      </div>
       
       {% if public_contributions %}
-        <div class="resources-grid" style="grid-template-columns: 1fr; gap: 1rem;">
+        <div class="resources-grid grid-cols-1 md:grid-cols-2 gap-6">
           {% for res in public_contributions %}
             {% include "components/resource_card.html" %}
           {% endfor %}
         </div>
       {% else %}
-        <div style="padding: 3rem; background: var(--color-surface); border: 1px dashed var(--color-border); border-radius: var(--radius-lg); text-align: center; color: var(--color-text-secondary);">
-          <p>No public contributions available.</p>
+        <div class="p-12 bg-surface border border-dashed border-border rounded-xl text-center text-secondary shadow-sm">
+          <i data-lucide="inbox" class="w-12 h-12 mx-auto mb-4 text-muted"></i>
+          <h3 class="text-lg font-bold text-brand mb-1">No Public Contributions</h3>
+          <p class="text-sm">This contributor hasn't published any resources yet.</p>
         </div>
       {% endif %}
     </div>
 
   </div>
 </div>
-
-<style>
-  @media (max-width: 768px) {
-    div[style*="grid-template-columns: 1fr 2fr"] {
-      grid-template-columns: 1fr !important;
-    }
-  }
-</style>
 {% endblock %}

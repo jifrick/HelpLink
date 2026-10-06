@@ -18,6 +18,12 @@ def _save_user_with_retry(db: Session, user: User) -> User:
             db.add(user)
             db.commit()
             db.refresh(user)
+            
+            # Grant initial level badge
+            from app.services.gamification_service import evaluate_level_badge
+            evaluate_level_badge(db, user)
+            db.commit()
+            
             return user
         except IntegrityError as e:
             db.rollback()
