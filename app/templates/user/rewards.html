@@ -11,40 +11,44 @@
       <p class="text-secondary text-base">Contribute to the community, unlock milestones, and earn exclusive badges.</p>
     </div>
     
-    <div class="card flex flex-row gap-8 items-center py-5 px-8 border border-border bg-surface shadow-sm rounded-xl">
-      <div class="flex flex-col items-center">
-        <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Current Balance</div>
-        <div class="text-2xl font-extrabold text-primary tabular-nums"><span id="user-balance">{{ current_user.helppoints_balance }}</span> <span class="text-base font-semibold">HP</span></div>
-      </div>
-      <div class="w-px h-10 bg-border"></div>
-      <div class="flex flex-col items-center">
-        <div class="text-xs font-bold text-muted uppercase tracking-wider mb-1">Lifetime Earned</div>
-        <div class="text-2xl font-extrabold text-brand tabular-nums"><span>{{ current_user.lifetime_helppoints }}</span> <span class="text-base font-semibold">HP</span></div>
-      </div>
+    <div class="card flex flex-col items-center text-center py-6 px-10 border border-border bg-surface shadow-sm rounded-xl">
+      <div class="text-xs font-bold text-muted uppercase tracking-wider mb-2">Total HelpPoints Earned</div>
+      <div class="text-3xl font-extrabold text-brand tabular-nums"><span>{{ current_user.lifetime_helppoints }}</span> <span class="text-lg font-semibold ml-1">HP</span></div>
+      <div class="text-sm text-secondary mt-2">Your lifetime contribution to the HelpLink community.</div>
     </div>
   </div>
 
   {% if next_milestone %}
-  <div class="bg-surface border border-border p-5 rounded-xl shadow-sm mb-12">
-    <div class="flex justify-between items-center mb-2">
-      <span class="text-sm font-bold text-muted uppercase tracking-wider">Next Milestone: {{ next_milestone.milestone_threshold }} HP</span>
-      <span class="text-sm font-semibold text-primary">
-        {% set progress = (current_user.lifetime_helppoints / next_milestone.milestone_threshold) * 100 %}
-        {% if progress > 100 %}{% set progress = 100 %}{% endif %}
-        {{ progress|int }}%
-      </span>
+  <div class="bg-surface border border-border p-6 rounded-xl shadow-sm mb-12">
+    <div class="flex justify-between items-end mb-3">
+      <div>
+        <div class="text-sm font-bold text-brand">{{ current_user.lifetime_helppoints }} HP earned</div>
+        <div class="text-xs text-secondary mt-0.5">Next milestone: {{ next_milestone.milestone_threshold }} HP</div>
+      </div>
+      <div class="text-sm font-semibold text-primary tabular-nums">
+        {{ current_user.lifetime_helppoints }} / {{ next_milestone.milestone_threshold }} HP
+      </div>
     </div>
-    <div class="w-full bg-border rounded-full h-3 mb-3">
-      <div class="bg-primary h-3 rounded-full" style="width: {{ progress }}%"></div>
+    
+    {% set progress = (current_user.lifetime_helppoints / next_milestone.milestone_threshold) * 100 %}
+    {% if progress > 100 %}{% set progress = 100 %}{% endif %}
+    
+    <div class="w-full bg-border rounded-full h-3 mb-3 overflow-hidden">
+      <div class="bg-primary h-full rounded-full transition-all duration-1000 ease-out" style="width: {{ progress }}%"></div>
     </div>
-    <div class="text-sm text-secondary font-medium">Unlock: <strong class="text-brand">{{ next_milestone.name }}</strong></div>
+    
+    <div class="text-sm font-semibold text-brand flex items-center">
+      <i data-lucide="gift" class="w-4 h-4 mr-1.5 text-primary"></i>
+      {{ next_milestone.milestone_threshold - current_user.lifetime_helppoints }} HP to unlock {{ next_milestone.name }}
+    </div>
   </div>
   {% else %}
-  <div class="bg-success-soft border border-success-light p-5 rounded-xl mb-12">
-    <div class="flex items-center text-success">
-      <i data-lucide="award" class="w-6 h-6 mr-3"></i>
-      <div class="font-bold">You've unlocked all current milestone rewards! More coming soon.</div>
+  <div class="bg-surface border border-success border-opacity-30 p-6 rounded-xl shadow-sm mb-12 text-center">
+    <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-success-soft text-success mb-3">
+      <i data-lucide="award" class="w-6 h-6"></i>
     </div>
+    <div class="font-bold text-brand text-lg">ALL STICKER MILESTONES UNLOCKED</div>
+    <div class="text-sm text-secondary mt-1">You have reached the highest milestone. Thank you!</div>
   </div>
   {% endif %}
 

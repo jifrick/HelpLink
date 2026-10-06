@@ -29,20 +29,15 @@
       <span>Joined {{ profile_user.created_at.strftime('%b %Y') }}</span>
     </div>
     
-    <div class="flex justify-center gap-6 md:gap-12 text-brand font-bold flex-wrap">
+    <div class="flex justify-center gap-8 md:gap-16 text-brand font-bold flex-wrap">
       <div class="flex flex-col items-center">
         <div class="text-3xl text-primary">{{ profile_user.level }}</div>
         <div class="text-xs uppercase text-muted tracking-widest mt-1">Current Level</div>
       </div>
       <div class="w-px bg-border hidden md:block"></div>
       <div class="flex flex-col items-center">
-        <div class="text-3xl tabular-nums">{{ profile_user.helppoints_balance }} <span class="text-lg">HP</span></div>
-        <div class="text-xs uppercase text-muted tracking-widest mt-1">Current Balance</div>
-      </div>
-      <div class="w-px bg-border hidden md:block"></div>
-      <div class="flex flex-col items-center">
         <div class="text-3xl tabular-nums text-brand">{{ profile_user.lifetime_helppoints }} <span class="text-lg">HP</span></div>
-        <div class="text-xs uppercase text-muted tracking-widest mt-1">Lifetime Earned</div>
+        <div class="text-xs uppercase text-muted tracking-widest mt-1">Total Earned</div>
       </div>
     </div>
   </div>

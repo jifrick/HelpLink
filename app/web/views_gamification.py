@@ -20,6 +20,11 @@ def rewards_store(
     db: Session = Depends(get_db),
     current_user: User = Depends(require_current_user)
 ):
+    from app.services.gamification_service import evaluate_milestones
+    # Backfill missing milestones just in case
+    evaluate_milestones(db, current_user)
+    db.commit()
+
     # Fetch milestones
     milestones = db.query(Reward).filter(Reward.is_milestone == True, Reward.status.in_(["READY", "COMING_SOON", "UNAVAILABLE"]), Reward.is_active == True).order_by(Reward.milestone_threshold).all()
     # Fetch redeemable rewards

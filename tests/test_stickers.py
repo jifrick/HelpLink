@@ -77,10 +77,32 @@ def test_milestone_grants(client, db: Session):
         r = db.query(RewardRedemption).filter_by(user_id=user.id, reward_id=p.id).first()
         assert r is not None, f"Failed to grant milestone {th}"
         
-    # 800 not granted
+    # 800 not granted yet
     p800 = db.query(Reward).filter(Reward.milestone_threshold == 800).first()
     r800 = db.query(RewardRedemption).filter_by(user_id=user.id, reward_id=p800.id).first()
     assert r800 is None
+
+    # 4. Jump to 1000 HP
+    award_points(db, user.id, 250, "TEST4") # 750 -> 1000
+    db.refresh(user)
+    assert user.lifetime_helppoints == 1000
+    
+    # Verify all 10 packs are unlocked
+    for th in range(100, 1100, 100):
+        p = db.query(Reward).filter(Reward.milestone_threshold == th).first()
+        r = db.query(RewardRedemption).filter_by(user_id=user.id, reward_id=p.id).first()
+        assert r is not None, f"Failed to grant milestone {th}"
+        
+    # 5. Repeated evaluation (idempotency)
+    from app.services.gamification_service import evaluate_milestones
+    evaluate_milestones(db, user)
+    db.commit()
+    
+    # Ensure no duplicates created
+    for th in range(100, 1100, 100):
+        p = db.query(Reward).filter(Reward.milestone_threshold == th).first()
+        count = db.query(RewardRedemption).filter_by(user_id=user.id, reward_id=p.id).count()
+        assert count == 1, f"Duplicate rewards found for milestone {th}"
 
 def test_level_and_resource_badges(client, db: Session):
     # Setup test category since we rely on it for resources
@@ -140,3 +162,51 @@ def test_level_and_resource_badges(client, db: Session):
     badges_after_reject = db.query(Badge).join(UserBadge).filter(UserBadge.user_id == user.id, Badge.criteria_type == "RESOURCE_COUNT").all()
     assert len(badges_after_reject) == 1
     assert badges_after_reject[0].name == "Bronze Contributor"
+
+def test_legacy_migration(client, db: Session):
+    from scripts.migrate_legacy_milestones import migrate
+    from app.models.gamification import PointTransaction
+    
+    setup_test_milestones(db)
+    client.post("/register", data={"full_name": "Test3", "email": "m3@test.com", "password": "Password123!"})
+    user = db.query(User).filter(User.email == "m3@test.com").first()
+    
+    # Simulate legacy points where lifetime was 0 but transactions exist
+    db.add(PointTransaction(user_id=user.id, amount=750, transaction_type="LEGACY", reference_type="test"))
+    db.add(PointTransaction(user_id=user.id, amount=-730, transaction_type="SPEND", reference_type="spend"))
+    db.commit()
+    
+    user.helppoints_balance = 20
+    user.lifetime_helppoints = 0
+    db.commit()
+    
+    # Verify pre-migration state
+    assert db.query(RewardRedemption).filter_by(user_id=user.id).count() == 0
+    
+    # Run migration
+    migrate(db)
+    
+    db.refresh(user)
+    assert user.lifetime_helppoints == 750
+    assert user.helppoints_balance == 20
+    
+    # Verify Packs 1-7 granted
+    for th in range(100, 800, 100):
+        p = db.query(Reward).filter(Reward.milestone_threshold == th).first()
+        r = db.query(RewardRedemption).filter_by(user_id=user.id, reward_id=p.id).first()
+        assert r is not None, f"Failed to grant legacy milestone {th}"
+        
+    p800 = db.query(Reward).filter(Reward.milestone_threshold == 800).first()
+    r800 = db.query(RewardRedemption).filter_by(user_id=user.id, reward_id=p800.id).first()
+    assert r800 is None
+    
+    # Test idempotency
+    migrate(db)
+    for th in range(100, 800, 100):
+        p = db.query(Reward).filter(Reward.milestone_threshold == th).first()
+        count = db.query(RewardRedemption).filter_by(user_id=user.id, reward_id=p.id).count()
+        assert count == 1, f"Duplicate rewards found for milestone {th} after 2nd migration"
+        
+    # Verify Points not inflated
+    assert user.lifetime_helppoints == 750
+    assert user.helppoints_balance == 20

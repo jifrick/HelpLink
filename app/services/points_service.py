@@ -62,7 +62,7 @@ def get_next_level_info(points: int) -> dict:
     }
 
 def recalculate_user_level(db: Session, user: User) -> bool:
-    new_level = get_level_for_points(user.helppoints_balance)
+    new_level = get_level_for_points(user.lifetime_helppoints)
     if user.level != new_level:
         user.level = new_level
         return True

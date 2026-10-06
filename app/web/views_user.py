@@ -195,7 +195,7 @@ def user_dashboard(
     saved_items = get_user_saved_resources(db, current_user.id)
     
     # Gamification data
-    level_info = get_next_level_info(current_user.helppoints_balance)
+    level_info = get_next_level_info(current_user.lifetime_helppoints)
     recent_points = db.query(PointTransaction).filter(PointTransaction.user_id == current_user.id).order_by(PointTransaction.created_at.desc()).limit(5).all()
     user_badges = db.query(UserBadge).options(joinedload(UserBadge.badge)).filter(UserBadge.user_id == current_user.id).order_by(UserBadge.awarded_at.desc()).all()
 
